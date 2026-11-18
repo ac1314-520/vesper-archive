@@ -1,5 +1,7 @@
-import { PACK_BRAND, PACK_THEMES, RARITY_META, MASCOT_CONFIG, CARD_POOL, TOTAL_CARD_SLOTS } from './cards-config.js';
+import { PACK_BRAND, PACK_THEMES, RARITY_META, MASCOT_CONFIG, CARD_POOL, TOTAL_CARD_SLOTS } from './cards-config.js?v=20261118f';
 import { createSoundController } from './sound.js';
+
+console.info('[VESPER] 100-card archive · simulated stars build 2026.11.18f');
 
 const $ = (sel) => document.querySelector(sel);
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
@@ -44,6 +46,20 @@ const toastEl = $('#toast');
 
 const binderBtn = $('#binderBtn');
 const binderCountEl = $('#binderCount');
+const walletBtn = $('#walletBtn');
+const walletBalanceEl = $('#walletBalance');
+const walletDeltaEl = $('#walletDelta');
+const shopModal = $('#shopModal');
+const shopBackdrop = $('#shopBackdrop');
+const shopBalanceEl = $('#shopBalance');
+const walletHintEl = $('#walletHint');
+const shopReasonEl = $('#shopReason');
+const rechargeGrid = $('#rechargeGrid');
+const closeShopBtn = $('#closeShopBtn');
+const claimDailyBtn = $('#claimDailyBtn');
+const dailyStateEl = $('#dailyState');
+const resetWalletBtn = $('#resetWalletBtn');
+const stageFlash = $('#stageFlash');
 const pityBadge = $('#pityBadge');
 const pityTextEl = $('#pityText');
 const pityPips = [...pityBadge.querySelectorAll('.pity-pip')];
@@ -79,6 +95,25 @@ function showToast(message, duration = 2200) {
   toastTimer = setTimeout(() => {
     toastEl.hidden = true;
   }, duration);
+}
+
+function pulseHaptics(pattern) {
+  if (prefersReducedMotion || typeof navigator.vibrate !== 'function') return;
+  if (navigator.userActivation && !navigator.userActivation.isActive) return;
+  try {
+    navigator.vibrate(pattern);
+  } catch {}
+}
+
+function flashStage(color = 'rgba(255, 220, 150, 0.8)', strength = 1) {
+  if (!stageFlash || prefersReducedMotion) return;
+  stageFlash.style.setProperty('--flash-color', color);
+  stageFlash.style.setProperty('--flash-strength', String(clamp(strength, 0.35, 1.4)));
+  stageFlash.classList.remove('play');
+  void stageFlash.offsetWidth;
+  stageFlash.classList.add('play');
+  clearTimeout(stageFlashTimer);
+  stageFlashTimer = setTimeout(() => stageFlash.classList.remove('play'), 760);
 }
 
 function syncBinderFilterCounts() {
@@ -190,12 +225,56 @@ document.addEventListener('visibilitychange', () => {
 
 /* ---------- 图鉴存档与保底状态（localStorage 持久化） ---------- */
 const STORAGE_KEY = 'vesper-archive-v1';
+const WALLET_KEY = 'vesper-stars-v1';
 const PITY_THRESHOLD = 3; // 每 3 包必出 Ultra / Secret
+const STARTING_STARS = 1200;
+const PACK_COST = 300;
+const DAILY_BONUS = 100;
+const RECHARGE_TIERS = [
+  { price: 6, stars: 60, tag: '轻量' },
+  { price: 30, stars: 300, tag: '热门' },
+  { price: 98, stars: 980, tag: '推荐' },
+  { price: 198, stars: 1980, tag: '' },
+  { price: 328, stars: 3280, tag: '' },
+  { price: 648, stars: 6480, tag: '典藏' },
+];
 
 const FOIL_VARIANTS = [
   { key: 'reverse', label: '逆光异画' },
   { key: 'prism', label: '星蚀棱彩' },
 ];
+
+function createWallet() {
+  return {
+    balance: STARTING_STARS,
+    firstPackUsed: false,
+    firstRechargeUsed: false,
+    lastDaily: '',
+    totalRecharged: 0,
+    totalSpent: 0,
+  };
+}
+
+function loadWallet() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(WALLET_KEY) || 'null');
+    if (raw && typeof raw === 'object' && Number.isFinite(Number(raw.balance))) {
+      return {
+        ...createWallet(),
+        ...raw,
+        balance: Math.max(0, Math.floor(Number(raw.balance))),
+      };
+    }
+  } catch {}
+  return createWallet();
+}
+
+let wallet = loadWallet();
+let walletIsFresh = false;
+try {
+  walletIsFresh = !localStorage.getItem(WALLET_KEY);
+} catch {}
+let currentPackPaid = false;
 
 function loadBinderState() {
   try {
@@ -222,11 +301,224 @@ let binderVisibleCount = BINDER_BATCH;
 let binderReturnFocus = null;
 let resetConfirmTimer = null;
 let showcaseReturnFocus = null;
+let shopReturnFocus = null;
+let walletDeltaTimer = null;
+let stageFlashTimer = null;
 
 function saveBinderState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(binderState));
   } catch {}
+}
+
+/* ---------- 星钻钱包、模拟充值与祈愿价格 ---------- */
+function saveWallet() {
+  try {
+    localStorage.setItem(WALLET_KEY, JSON.stringify(wallet));
+  } catch {}
+}
+
+function formatStars(value) {
+  return Math.max(0, Math.round(Number(value) || 0)).toLocaleString('zh-CN');
+}
+
+function todayKey() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+function currentPackCost() {
+  return wallet.firstPackUsed ? PACK_COST : 0;
+}
+
+function updateDailyUI() {
+  if (!claimDailyBtn) return;
+  const claimed = wallet.lastDaily === todayKey();
+  claimDailyBtn.disabled = claimed;
+  if (dailyStateEl) dailyStateEl.textContent = claimed ? '明日再来' : '今日可领';
+}
+
+function updateDrawPriceUI() {
+  if (!openBtn) return;
+  const cost = currentPackCost();
+  const canPay = currentPackPaid || wallet.balance >= cost;
+  if (stageState === 'enter' || stageState === 'idle') {
+    if (currentPackPaid) {
+      openBtn.textContent = '拆开封条';
+    } else if (canPay) {
+      openBtn.textContent = cost === 0 ? '拆开封条 · 免费' : `拆开封条 · ${formatStars(cost)}`;
+    } else {
+      openBtn.textContent = '星钻不足 · 补给';
+    }
+    openBtn.classList.toggle('is-broke', !canPay);
+    openBtn.setAttribute(
+      'aria-label',
+      canPay
+        ? `拆开封条，消耗 ${formatStars(cost)} 星钻`
+        : '星钻不足，打开模拟星钻补给站'
+    );
+    if (!gestureHint.classList.contains('post-open')) {
+      gestureHint.textContent = canPay
+        ? cost === 0
+          ? '首包免费 · 按住封口撕开，或点击「拆开封条」'
+          : `本包 ${formatStars(cost)} 星钻 · 按住封口撕开，或点击「拆开封条」`
+        : '星钻不足 · 点击「拆开封条」打开模拟补给站';
+    }
+  }
+}
+
+function updateWalletUI() {
+  if (walletBalanceEl) walletBalanceEl.textContent = formatStars(wallet.balance);
+  if (shopBalanceEl) shopBalanceEl.textContent = formatStars(wallet.balance);
+  if (walletHintEl) {
+    walletHintEl.textContent = wallet.firstPackUsed
+      ? `每包 ${formatStars(PACK_COST)} 星钻 · 首充双倍已${wallet.firstRechargeUsed ? '领取' : '可享'}`
+      : `首包免费 · 之后每包 ${formatStars(PACK_COST)} 星钻`;
+  }
+  updateDailyUI();
+  updateDrawPriceUI();
+}
+
+function animateWalletDelta(delta) {
+  if (!walletDeltaEl || !walletBtn || !delta) return;
+  walletDeltaEl.textContent = `${delta > 0 ? '+' : '−'}${formatStars(Math.abs(delta))}`;
+  walletBtn.classList.remove('is-gain', 'is-spend', 'is-pulsing');
+  void walletBtn.offsetWidth;
+  walletBtn.classList.add(delta > 0 ? 'is-gain' : 'is-spend', 'is-pulsing');
+  clearTimeout(walletDeltaTimer);
+  walletDeltaTimer = setTimeout(() => {
+    walletBtn.classList.remove('is-gain', 'is-spend', 'is-pulsing');
+  }, 900);
+}
+
+function renderRechargeTiers() {
+  if (!rechargeGrid) return;
+  const doubleFirst = !wallet.firstRechargeUsed;
+  rechargeGrid.innerHTML = RECHARGE_TIERS.map((tier, index) => `
+    <button class="recharge-card${tier.tag === '推荐' ? ' is-featured' : ''}" type="button" data-recharge-index="${index}" aria-label="模拟充值 ${tier.price} 元，获得 ${formatStars(tier.stars * (doubleFirst ? 2 : 1))} 星钻">
+      <span class="recharge-tag">${tier.tag || '模拟'}</span>
+      <span class="recharge-stars"><strong>${formatStars(tier.stars)}</strong><span>星钻</span></span>
+      <span class="recharge-price">模拟 ¥${tier.price}</span>
+      <span class="recharge-bonus">${doubleFirst ? `首充双倍 · 实得 ${formatStars(tier.stars * 2)}` : '点击立即到账'}</span>
+    </button>
+  `).join('');
+}
+
+function setShopOpenChrome(isOpen) {
+  for (const el of [stageEl, document.querySelector('.top-bar'), document.querySelector('.bottom-chrome'), binderModal]) {
+    if (el) el.inert = isOpen;
+  }
+}
+
+function openShop(reason = '') {
+  if (!shopModal) return;
+  shopReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : walletBtn;
+  dismissShowcaseCard();
+  zoomedCard = null;
+  shopModal.hidden = false;
+  setShopOpenChrome(true);
+  document.body.classList.add('shop-open');
+  renderRechargeTiers();
+  updateWalletUI();
+  if (shopReasonEl) {
+    shopReasonEl.textContent = reason === 'insufficient'
+      ? '星钻不足 · 选择模拟充值或本地体验补给后，再继续拆包'
+      : '模拟充值 · 不产生任何真实扣费 · 星钻只保存在本机';
+  }
+  requestAnimationFrame(() => closeShopBtn?.focus({ preventScroll: true }));
+}
+
+function closeShop({ restoreFocus = true } = {}) {
+  if (!shopModal || shopModal.hidden) return;
+  shopModal.hidden = true;
+  document.body.classList.remove('shop-open');
+  setShopOpenChrome(false);
+  if (restoreFocus && shopReturnFocus?.isConnected) {
+    shopReturnFocus.focus({ preventScroll: true });
+  }
+}
+
+function ensurePackAccess() {
+  if (currentPackPaid) return true;
+  const cost = currentPackCost();
+  if (wallet.balance < cost) {
+    openShop('insufficient');
+    return false;
+  }
+  if (cost > 0) {
+    wallet.balance -= cost;
+    wallet.totalSpent += cost;
+    animateWalletDelta(-cost);
+  }
+  wallet.firstPackUsed = true;
+  currentPackPaid = true;
+  saveWallet();
+  updateWalletUI();
+  return true;
+}
+
+function simulateRecharge(index) {
+  const tier = RECHARGE_TIERS[index];
+  if (!tier) return;
+  const wasFirst = !wallet.firstRechargeUsed;
+  const gain = tier.stars * (wasFirst ? 2 : 1);
+  wallet.balance += gain;
+  wallet.firstRechargeUsed = true;
+  wallet.totalRecharged += tier.price;
+  saveWallet();
+  if (wasFirst) renderRechargeTiers();
+  updateWalletUI();
+  animateWalletDelta(gain);
+  if (wasFirst) {
+    requestAnimationFrame(() => rechargeGrid?.querySelector(`[data-recharge-index="${index}"]`)?.focus({ preventScroll: true }));
+  }
+  if (shopReasonEl && wallet.balance >= currentPackCost()) {
+    shopReasonEl.textContent = '模拟充值 · 不产生任何真实扣费 · 星钻只保存在本机';
+  }
+  sound.call('click');
+  showToast(`模拟充值 ¥${tier.price} 成功 · +${formatStars(gain)} 星钻（未真实扣费）`, 3200);
+}
+
+function addLocalStars(amount) {
+  if (!Number.isFinite(amount) || amount <= 0) return;
+  wallet.balance += amount;
+  saveWallet();
+  updateWalletUI();
+  animateWalletDelta(amount);
+  if (shopReasonEl && wallet.balance >= currentPackCost()) {
+    shopReasonEl.textContent = '模拟充值 · 不产生任何真实扣费 · 星钻只保存在本机';
+  }
+  sound.call('click');
+  showToast(`本地体验补给 · +${formatStars(amount)} 星钻`, 2200);
+}
+
+function claimDaily() {
+  const today = todayKey();
+  if (wallet.lastDaily === today) {
+    showToast('今日星钻已领取，明天再来', 1800);
+    return;
+  }
+  wallet.lastDaily = today;
+  wallet.balance += DAILY_BONUS;
+  saveWallet();
+  updateWalletUI();
+  animateWalletDelta(DAILY_BONUS);
+  if (shopReasonEl && wallet.balance >= currentPackCost()) {
+    shopReasonEl.textContent = '模拟充值 · 不产生任何真实扣费 · 星钻只保存在本机';
+  }
+  sound.call('click');
+  showToast(`每日签到 · +${formatStars(DAILY_BONUS)} 星钻`, 2200);
+}
+
+function resetWallet() {
+  wallet = createWallet();
+  walletIsFresh = false;
+  saveWallet();
+  renderRechargeTiers();
+  updateWalletUI();
+  if (shopReasonEl) shopReasonEl.textContent = '模拟充值 · 不产生任何真实扣费 · 星钻只保存在本机';
+  sound.call('click');
+  showToast('星钻钱包已重置为 1,200 · 首包免费已恢复', 2400);
 }
 
 function recordCardUnlock(def, foilVariant) {
@@ -1362,6 +1654,14 @@ function flipCard(cardObj, { silentBanner = false } = {}) {
   spawnFlipBurst(cardObj);
   triggerStageImpact(def.rarity);
 
+  if (rank >= 4 && !prefersReducedMotion) {
+    cardObj.el.style.setProperty('--surge-color', RARITY_META[def.rarity].shockColor || '#ffd454');
+    cardObj.el.classList.add('rank-surge');
+    setTimeout(() => cardObj.el.classList.remove('rank-surge'), 900);
+    flashStage(RARITY_META[def.rarity].shockColor || '#ffd454', rank >= 5 ? 0.95 : 0.68);
+    pulseHaptics(rank >= 5 ? [20, 36, 22] : [14, 24]);
+  }
+
   if (!silentBanner && rank >= 4) {
     showPullBanner(
       def.rarity === 'secret' ? 'SECRET CONSTELLATION' : 'ULTRA RARE HIT',
@@ -1832,6 +2132,58 @@ binderBackdrop.addEventListener('click', () => {
   closeBinder();
 });
 
+/* ---------- 星钻补给站 ---------- */
+walletBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  sound.call('click');
+  openShop();
+});
+
+closeShopBtn?.addEventListener('click', () => {
+  sound.call('click');
+  closeShop();
+});
+
+shopBackdrop?.addEventListener('click', () => {
+  closeShop();
+});
+
+rechargeGrid?.addEventListener('click', (e) => {
+  const button = e.target.closest('[data-recharge-index]');
+  if (!button) return;
+  simulateRecharge(Number(button.dataset.rechargeIndex));
+});
+
+claimDailyBtn?.addEventListener('click', () => {
+  claimDaily();
+});
+
+resetWalletBtn?.addEventListener('click', () => {
+  resetWallet();
+});
+
+shopModal?.addEventListener('click', (e) => {
+  const button = e.target.closest('[data-add-stars]');
+  if (!button) return;
+  addLocalStars(Number(button.dataset.addStars));
+});
+
+shopModal?.addEventListener('keydown', (e) => {
+  if (e.key !== 'Tab') return;
+  const focusable = [...shopModal.querySelectorAll('button:not([disabled]):not([hidden]), [href], [tabindex]:not([tabindex="-1"])')]
+    .filter((el) => el.offsetParent !== null);
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault();
+    first.focus();
+  }
+});
+
 binderFilterBtns.forEach((btn) => {
   btn.addEventListener('click', () => {
     const next = btn.dataset.binderFilter;
@@ -1978,6 +2330,7 @@ function syncPackGodVisual() {
 /* ---------- 新卡包入场与撕包事件 ---------- */
 function enterFreshPack() {
   stageState = 'enter';
+  currentPackPaid = false;
   zoomedCard = null;
   dismissShowcaseCard();
   pullBanner.hidden = true;
@@ -2002,6 +2355,9 @@ function enterFreshPack() {
   openBtn.hidden = false;
   flipAllBtn.hidden = true;
   againBtn.hidden = true;
+  flipAllBtn.disabled = false;
+  againBtn.disabled = false;
+  updateDrawPriceUI();
 
   for (const f of pouchFaces) f.style.clipPath = '';
   bodyLip.style.clipPath = '';
@@ -2102,6 +2458,14 @@ function triggerPackBurst() {
     showPullBanner('OMNI PACK RELEASED', '欧皇全高罕星匣 · 五道星光同时降临', 3600);
   }
 
+  const burstRarity = currentPackRoll.topRarity || 'common';
+  const burstMeta = RARITY_META[burstRarity] || RARITY_META.common;
+  const burstColor = currentPackRoll.isGodPack ? '#ffd454' : burstMeta.shockColor || '#5ce6ff';
+  if (!prefersReducedMotion && (currentPackRoll.isGodPack || RARITY_META[burstRarity].rank >= 3)) {
+    flashStage(burstColor, currentPackRoll.isGodPack ? 1.15 : 0.7);
+    pulseHaptics(currentPackRoll.isGodPack ? [24, 36, 22] : [14, 22]);
+  }
+
   liveStatus.textContent = `${currentTheme.name} 星匣已拆开，点击发光的卡背揭晓星灵。`;
   packPose.rx.configure(0.3);
   packPose.ry.configure(0.3);
@@ -2129,12 +2493,12 @@ function triggerPackBurst() {
 
     const [mx, my] = stageToScreen(packPose.x.x, packPose.y.x - packHeight * 0.34, 20);
     shockRings.push(
-      { x: mx, y: my, r0: packWidth * 0.22, r1: packWidth * 1.35, age: 0, life: 0.46, color: currentPackRoll.isGodPack ? '#ffd454' : '#5ce6ff', width: 4.2 },
+      { x: mx, y: my, r0: packWidth * 0.22, r1: packWidth * 1.35, age: 0, life: 0.46, color: burstColor, width: 4.2 },
       { x: mx, y: my, r0: packWidth * 0.18, r1: packWidth * 1.65, age: -0.05, life: 0.52, color: '#ff66dc', width: 2.8 }
     );
     emitScreenSparks(mx, my, {
       count: isCoarsePointer ? 24 : 42,
-      colors: ['#ffd454', '#ffffff', '#5ce6ff', '#ff66dc', '#4fd9a0'],
+      colors: [burstColor, '#ffffff', '#5ce6ff', '#ff66dc', '#4fd9a0'],
       speedMin: 180,
       speedMax: 620,
       gravity: 540,
@@ -2143,7 +2507,7 @@ function triggerPackBurst() {
       scaleMin: 0.75,
       scaleMax: 1.5,
     });
-    triggerStageImpact(currentPackRoll.isGodPack ? 'secret' : 'ultra');
+    triggerStageImpact(currentPackRoll.isGodPack ? 'secret' : burstRarity);
   }
 
   spawnPackCards();
@@ -2163,6 +2527,7 @@ function beginTearOpen({ fromKeyboard = false } = {}) {
     for (const s of Object.values(packPose)) s.configure(0.28, 0.25);
   }
   if (stageState !== 'idle' || tearState.p.to >= 1) return;
+  if (!ensurePackAccess()) return;
   openedByKeyboard = fromKeyboard;
   dismissShowcaseCard();
   if (!tearState.p.to) tearState.dir = Math.random() < 0.5 ? -1 : 1;
@@ -2184,14 +2549,41 @@ shakeBtn.addEventListener('click', (e) => {
 
 flipAllBtn.addEventListener('click', (e) => {
   e.stopPropagation();
+  if (flipAllBtn.disabled) return;
   sound.call('click');
   const pending = cards
     .filter((c) => !c.revealed)
     .sort((a, b) => RARITY_META[a.def.rarity].rank - RARITY_META[b.def.rarity].rank);
-  pending.forEach((c, idx) => {
+  if (!pending.length) return;
+  flipAllBtn.disabled = true;
+  flipAllBtn.setAttribute('aria-busy', 'true');
+  againBtn.disabled = true;
+  const total = pending.length;
+  const topCard = pending[total - 1];
+  pending.forEach((card, idx) => {
     setTimeout(() => {
-      if (cards.includes(c) && !c.revealed) flipCard(c);
-    }, idx * 145);
+      if (!cards.includes(card) || card.revealed) return;
+      flipCard(card, { silentBanner: true });
+      flipAllBtn.textContent = `揭晓中 ${idx + 1}/${total}`;
+      if (idx === total - 1) {
+        setTimeout(() => {
+          flipAllBtn.disabled = false;
+          flipAllBtn.removeAttribute('aria-busy');
+          flipAllBtn.textContent = '一键翻开';
+          againBtn.disabled = false;
+          if (topCard && RARITY_META[topCard.def.rarity].rank >= 4) {
+            const isSecret = topCard.def.rarity === 'secret';
+            showPullBanner(
+              isSecret ? 'SECRET CONSTELLATION' : 'ULTRA RARE HIT',
+              `${isSecret ? '秘藏星灵降临' : '极耀星灵'} · ${topCard.def.name}`,
+              3200
+            );
+            flashStage(RARITY_META[topCard.def.rarity].shockColor || '#ffd454', isSecret ? 1.05 : 0.8);
+            pulseHaptics(isSecret ? [22, 42, 26] : [16, 26]);
+          }
+        }, 300);
+      }
+    }, idx * 155);
   });
 });
 
@@ -2262,6 +2654,7 @@ function endDrag(e) {
   if (!didDragMove || stageState !== 'idle') return;
 
   if (tearState.p.to > 0.54) {
+    if (!ensurePackAccess()) return;
     autoCompleteTear(0.18);
     return;
   }
@@ -2364,6 +2757,10 @@ window.addEventListener('resize', () => {
 
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
+    if (!shopModal.hidden) {
+      closeShop();
+      return;
+    }
     if (!binderModal.hidden) {
       closeBinder();
       return;
@@ -2867,6 +3264,11 @@ function tick(nowMs) {
 
 measureStage();
 enterFreshPack();
+updateWalletUI();
+if (walletIsFresh) {
+  saveWallet();
+  setTimeout(() => showToast('新手补给 · 1,200 星钻已到账，首包免费', 4200), 900);
+}
 requestAnimationFrame(tick);
 
 // 样卡审阅入口：?preview=inkblade / ?preview=perfume

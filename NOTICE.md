@@ -44,6 +44,18 @@ client for sample-card evaluation. They are not authored by this project and are
 **not** covered by the MIT license. Confirm the appropriate rights before making
 the site public. Replace them with licensed artwork if needed.
 
+## Simulated top-up and virtual stars
+
+The star wallet (`vesper-stars-v1`), daily sign-in, recharge tiers, first-recharge
+bonus, and local "experience top-up" buttons are a **local-only simulation**.
+There is no payment provider, checkout, WeChat/QQ/Alipay/bank integration, or
+real-money flow anywhere in this repository. Prices such as `¥6`, `¥30`, and
+`¥648` are visual references to common Tencent game voucher tiers and do not
+represent a real charge.
+
+The currency has no cash value, is stored only in the visitor's browser
+`localStorage`, and is not affiliated with or endorsed by Tencent or Riot Games.
+
 ## Golden Spatula / Teamfight Tactics sample covers
 
 `assets/golden-spatula/` contains 82 sample covers and the card metadata under
