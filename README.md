@@ -77,7 +77,9 @@ ssh -T -R 80:localhost:4173 nokey@localhost.run
 - Cloudflare Pages：上传整个文件夹，输出目录填 `/`
 - Vercel / Netlify：导入文件夹，Build Command 留空
 - 腾讯云 COS / 阿里云 OSS / 对象存储：开启静态网站托管，上传整个文件夹
-- GitHub Pages：把整个文件夹推到仓库并开启 Pages
+- GitHub Pages：打开仓库 **Settings → Pages → Build and deployment**，
+  Source 选择 **Deploy from a branch**，Branch 选 `main`，目录选 `/(root)`，Save。
+  仓库根目录已经包含 `index.html` 和 `.nojekyll`，无需构建。
 
 部署后得到的 HTTPS 地址可以直接分享。若朋友主要在国内，建议用国内对象存储或备案过的静态托管，访问会更稳定。
 
