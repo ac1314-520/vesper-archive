@@ -12,7 +12,7 @@
  * 可选 `fullName` 用于完整长名的悬停提示与无障碍标签。
  */
 
-import { GOLDEN_SPATULA_CARDS } from './golden-spatula-cards.js?v=20261118f';
+import { GOLDEN_SPATULA_CARDS } from './golden-spatula-cards.js?v=20261118g';
 
 export const TOTAL_CARD_SLOTS = 100;
 

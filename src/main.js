@@ -1,7 +1,7 @@
-import { PACK_BRAND, PACK_THEMES, RARITY_META, MASCOT_CONFIG, CARD_POOL, TOTAL_CARD_SLOTS } from './cards-config.js?v=20261118f';
+import { PACK_BRAND, PACK_THEMES, RARITY_META, MASCOT_CONFIG, CARD_POOL, TOTAL_CARD_SLOTS } from './cards-config.js?v=20261118g';
 import { createSoundController } from './sound.js';
 
-console.info('[VESPER] 100-card archive · simulated stars build 2026.11.18f');
+console.info('[VESPER] 100-card archive · simulated stars build 2026.11.18g');
 
 const $ = (sel) => document.querySelector(sel);
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
@@ -55,6 +55,7 @@ const shopBalanceEl = $('#shopBalance');
 const walletHintEl = $('#walletHint');
 const shopReasonEl = $('#shopReason');
 const rechargeGrid = $('#rechargeGrid');
+const rechargeHintEl = $('#rechargeHint');
 const closeShopBtn = $('#closeShopBtn');
 const claimDailyBtn = $('#claimDailyBtn');
 const dailyStateEl = $('#dailyState');
@@ -372,8 +373,13 @@ function updateWalletUI() {
   if (shopBalanceEl) shopBalanceEl.textContent = formatStars(wallet.balance);
   if (walletHintEl) {
     walletHintEl.textContent = wallet.firstPackUsed
-      ? `每包 ${formatStars(PACK_COST)} 星钻 · 首充双倍已${wallet.firstRechargeUsed ? '领取' : '可享'}`
+      ? `每包 ${formatStars(PACK_COST)} 星钻 · 首充双倍${wallet.firstRechargeUsed ? '已领取' : '待领取'}`
       : `首包免费 · 之后每包 ${formatStars(PACK_COST)} 星钻`;
+  }
+  if (rechargeHintEl) {
+    rechargeHintEl.textContent = wallet.firstRechargeUsed
+      ? '点击档位即模拟到账'
+      : '首充双倍 · 点击即模拟到账';
   }
   updateDailyUI();
   updateDrawPriceUI();
