@@ -1,0 +1,27 @@
+{
+  "name": "vesper-archive",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VESPER · 长庚秘藏 — 18 位星灵的私人全息抽卡档案馆。原生 Web、零第三方依赖。",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "preview": "node server.mjs",
+    "generate-assets": "node scripts/generate-assets.mjs"
+  },
+  "keywords": [
+    "gacha",
+    "holographic-card",
+    "interactive-design",
+    "css-3d",
+    "web-audio-api",
+    "tactile-ui",
+    "zero-dependency",
+    "sdf-raymarching"
+  ],
+  "author": "VESPER Archive · based on PRISM by SimpleMkt",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
