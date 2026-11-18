@@ -92,4 +92,8 @@ request replacement of any cover.
 
 See `assets/honor-of-kings/sources.json` for per-card source records.
 
+## Ultimate prize photo
 
+`assets/ultimate/longgeng-cat.webp` is the cat photograph supplied by the site
+owner for the "长庚猫猫" ultimate-prize sample card. It is not MIT-licensed and
+should not be reused outside this personal fan project.

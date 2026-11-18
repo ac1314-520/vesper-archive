@@ -2,7 +2,7 @@
   "name": "vesper-archive",
   "version": "1.0.0",
   "private": true,
-  "description": "VESPER · 长庚秘藏 — 270 位星灵的私人全息抽卡档案馆，含星钻经济、模拟充值、金铲铲与王者荣耀收藏样卡。原生 Web、零第三方依赖。",
+  "description": "VESPER · 长庚秘藏 — 271 位星灵的私人全息抽卡档案馆，含终极大奖、星钻经济、模拟充值、金铲铲与王者荣耀收藏样卡。原生 Web、零第三方依赖。",
   "type": "module",
   "scripts": {
     "start": "node server.mjs",

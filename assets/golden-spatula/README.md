@@ -1,7 +1,7 @@
 # Golden Spatula sample covers
 
 This folder contains the 82 local covers used by the VESPER archive filler cards
-(serials `019/270`–`100/270`).
+(serials `019/271`–`100/271`).
 
 ## Files
 

@@ -1,7 +1,7 @@
-import { PACK_BRAND, PACK_THEMES, RARITY_META, MASCOT_CONFIG, CARD_POOL, TOTAL_CARD_SLOTS } from './cards-config.js?v=20261118h';
+import { PACK_BRAND, PACK_THEMES, RARITY_META, MASCOT_CONFIG, CARD_POOL, TOTAL_CARD_SLOTS } from './cards-config.js?v=20261118i';
 import { createSoundController } from './sound.js';
 
-console.info('[VESPER] 270-card archive · HOK expansion · build 2026.11.18h');
+console.info('[VESPER] 271-card archive · ultimate prize + HOK expansion · build 2026.11.18i');
 
 const $ = (sel) => document.querySelector(sel);
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
@@ -81,6 +81,17 @@ const binderMoreBtn = $('#binderMoreBtn');
 const binderEmpty = $('#binderEmpty');
 const closeBinderBtn = $('#closeBinderBtn');
 const resetBinderBtn = $('#resetBinderBtn');
+const milkTeaBtn = $('#milkTeaBtn');
+const claimModal = $('#claimModal');
+const claimBackdrop = $('#claimBackdrop');
+const closeClaimBtn = $('#closeClaimBtn');
+const claimAcceptBtn = $('#claimAcceptBtn');
+const claimIntro = $('#claimIntro');
+const claimCodePanel = $('#claimCodePanel');
+const claimCodeEl = $('#claimCode');
+const copyClaimBtn = $('#copyClaimBtn');
+const claimMeta = $('#claimMeta');
+const claimNote = $('#claimNote');
 
 const pouchFaces = [...pack.querySelectorAll(':scope > .pouch-face')];
 const bodyLip = $('#bodyLip');
@@ -303,6 +314,8 @@ let binderReturnFocus = null;
 let resetConfirmTimer = null;
 let showcaseReturnFocus = null;
 let shopReturnFocus = null;
+let claimReturnFocus = null;
+let claimOpenTimer = null;
 let walletDeltaTimer = null;
 let stageFlashTimer = null;
 
@@ -444,6 +457,133 @@ function closeShop({ restoreFocus = true } = {}) {
   }
 }
 
+/* ---------- 终极大奖：长庚猫猫与奶茶契约 ---------- */
+const ULTIMATE_CLAIM_KEY = 'vesper-ultimate-claim-v1';
+const ULTIMATE_RATE = 0.0005;
+const ULTIMATE_CARD = CARD_POOL.find((card) => card.ultimate);
+let ultimateClaim = loadUltimateClaim();
+
+function loadUltimateClaim() {
+  try {
+    const raw = localStorage.getItem(ULTIMATE_CLAIM_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveUltimateClaim(claim) {
+  ultimateClaim = claim;
+  try {
+    localStorage.setItem(ULTIMATE_CLAIM_KEY, JSON.stringify(claim));
+  } catch {}
+  updateMilkTeaButton();
+}
+
+function updateMilkTeaButton() {
+  if (!milkTeaBtn) return;
+  milkTeaBtn.hidden = !ultimateClaim?.eligible;
+}
+
+function makeClaimCode(packs, unique) {
+  const stamp = Date.now().toString(36).slice(-6).toUpperCase();
+  return `VSP-${String(packs).padStart(2, '0')}${String(unique).padStart(2, '0')}-${stamp}`;
+}
+
+function issueUltimateClaim(def) {
+  if (!def?.ultimate) return;
+  const packs = binderState.packsOpened;
+  const unique = Object.keys(binderState.owned).length;
+  const eligible = packs <= 2 && unique <= 10;
+  const claim = {
+    code: eligible ? makeClaimCode(packs, unique) : '',
+    eligible,
+    packs,
+    unique,
+    at: new Date().toISOString(),
+    name: def.fullName || def.name,
+  };
+  saveUltimateClaim(claim);
+  clearTimeout(claimOpenTimer);
+  if (eligible) {
+    claimOpenTimer = setTimeout(() => openClaimModal(), 1500);
+  } else {
+    claimOpenTimer = setTimeout(() => {
+      showToast('终极大奖已收录 · 本次未触发两包内奶茶券', 3600);
+    }, 1600);
+  }
+}
+
+function setClaimOpenChrome(isOpen) {
+  for (const el of [stageEl, document.querySelector('.top-bar'), document.querySelector('.bottom-chrome'), binderModal]) {
+    if (el) el.inert = isOpen;
+  }
+}
+
+function formatClaimTime(iso) {
+  try {
+    return new Date(iso).toLocaleString('zh-CN', { hour12: false });
+  } catch {
+    return iso;
+  }
+}
+
+function openClaimModal() {
+  if (!claimModal) return;
+  if (!claimModal.hidden) return;
+  claimReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : binderBtn;
+  const claim = ultimateClaim;
+  if (!claim) return;
+
+  if (claim.eligible) {
+    claimIntro.textContent = `你在第 ${claim.packs} 包、图鉴收录 ${claim.unique} 位星灵时，开出了终极大奖「长庚猫猫」。奶茶券条件已达成。`;
+    claimCodePanel.hidden = false;
+    claimCodeEl.textContent = claim.code;
+    claimNote.textContent = '凭本券找作者领取一杯奶茶。本券为本地生成凭证，无后端验证；作者会人工核验截图与兑换码。';
+  } else {
+    claimIntro.textContent = `你在第 ${claim.packs} 包、图鉴收录 ${claim.unique} 位星灵时，开出了终极大奖「长庚猫猫」。很遗憾，本次已超出「两包内 / 图鉴 10 以内」的奶茶券条件。`;
+    claimCodePanel.hidden = true;
+    claimNote.textContent = '终极大奖仍已永久收录在星灵图鉴中。下一轮重置后再开出，仍可重新触发条件。';
+  }
+
+  claimMeta.innerHTML = `
+    <span><b>开包序号</b><em>${claim.packs}</em></span>
+    <span><b>图鉴收录</b><em>${claim.unique} / ${TOTAL_CARD_SLOTS}</em></span>
+    <span><b>生成时间</b><em>${formatClaimTime(claim.at)}</em></span>
+  `;
+
+  claimModal.hidden = false;
+  setClaimOpenChrome(true);
+  document.body.classList.add('claim-open');
+  requestAnimationFrame(() => closeClaimBtn?.focus({ preventScroll: true }));
+}
+
+function closeClaim({ restoreFocus = true } = {}) {
+  if (!claimModal || claimModal.hidden) return;
+  claimModal.hidden = true;
+  setClaimOpenChrome(false);
+  document.body.classList.remove('claim-open');
+  if (restoreFocus && claimReturnFocus?.isConnected) {
+    claimReturnFocus.focus({ preventScroll: true });
+  }
+  claimReturnFocus = null;
+}
+
+async function copyClaimCode() {
+  if (!ultimateClaim?.code) return;
+  try {
+    await navigator.clipboard.writeText(ultimateClaim.code);
+    showToast('兑换码已复制');
+  } catch {
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(claimCodeEl);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+    showToast('已选中兑换码，请手动复制');
+  }
+}
+
 function ensurePackAccess() {
   if (currentPackPaid) return true;
   const cost = currentPackCost();
@@ -581,12 +721,13 @@ function showPullBanner(kicker, title, durationMs = 2900) {
 }
 
 /* ---------- 抽卡权重与欧皇包生成器 ---------- */
+const drawableCardPool = CARD_POOL.filter((card) => !card.excludeFromDraw);
 const POOL_BY_RARITY = {
-  common: CARD_POOL.filter((c) => c.rarity === 'common'),
-  rare: CARD_POOL.filter((c) => c.rarity === 'rare'),
-  holo: CARD_POOL.filter((c) => c.rarity === 'holo'),
-  ultra: CARD_POOL.filter((c) => c.rarity === 'ultra'),
-  secret: CARD_POOL.filter((c) => c.rarity === 'secret'),
+  common: drawableCardPool.filter((c) => c.rarity === 'common'),
+  rare: drawableCardPool.filter((c) => c.rarity === 'rare'),
+  holo: drawableCardPool.filter((c) => c.rarity === 'holo'),
+  ultra: drawableCardPool.filter((c) => c.rarity === 'ultra'),
+  secret: drawableCardPool.filter((c) => c.rarity === 'secret'),
 };
 
 function rollRarityByWeights(weights) {
@@ -624,7 +765,7 @@ function generatePackRoll({ forceGod = false } = {}) {
     ];
     defs = rarities.map(pickFromRarity);
   } else {
-    // 270 卡池的低爆率档位：高罕整体下调，第 5 格仍保底全息+
+    // 271 卡池的低爆率档位：高罕整体下调，第 5 格仍保底全息+
     const slot1 = pickFromRarity(rollRarityByWeights([['common', 88], ['rare', 12]]));
     const slot2 = pickFromRarity(rollRarityByWeights([['common', 86], ['rare', 12], ['holo', 2]]));
     const slot3 = pickFromRarity(rollRarityByWeights([['common', 82], ['rare', 15], ['holo', 3]]));
@@ -636,6 +777,14 @@ function generatePackRoll({ forceGod = false } = {}) {
     defs = [slot1, slot2, slot3, slot4, slot5];
   }
 
+  // 终极大奖：独立于常规稀有度池，每包 0.05% 概率，仅未拥有时可开出。
+  let isUltimate = false;
+  if (ULTIMATE_CARD && !binderState.owned[ULTIMATE_CARD.id] && Math.random() < ULTIMATE_RATE) {
+    defs[defs.length - 1] = ULTIMATE_CARD;
+    usedIds.add(ULTIMATE_CARD.id);
+    isUltimate = true;
+  }
+
   // 打乱槽位但让最高罕偏向中间位置（第 2~4 槽）更有戏剧感
   const sorted = [...defs].sort((a, b) => RARITY_META[a.rarity].rank - RARITY_META[b.rarity].rank);
   const topCard = sorted.pop();
@@ -644,7 +793,7 @@ function generatePackRoll({ forceGod = false } = {}) {
   rest.splice(centerIdx, 0, topCard);
 
   const entries = rest.map((def) => {
-    const foilChance = isGodPack ? 0.55 : def.rarity === 'common' ? 0.16 : 0.24;
+    const foilChance = def.ultimate ? 0 : isGodPack ? 0.55 : def.rarity === 'common' ? 0.16 : 0.24;
     const foilVariant = Math.random() < foilChance ? pickOne(FOIL_VARIANTS) : null;
     return { def, foilVariant };
   });
@@ -660,7 +809,7 @@ function generatePackRoll({ forceGod = false } = {}) {
   }
 
   preloadPackArt({ entries });
-  return { entries, isGodPack, maxRank, topRarity };
+  return { entries, isGodPack, isUltimate, maxRank, topRarity };
 }
 
 /* ---------- 角色表情矢量生成 ---------- */
@@ -749,6 +898,7 @@ function warmCardArt(def) {
   warmedCardArt.add(src);
   const img = new Image();
   img.decoding = 'async';
+  img.fetchPriority = 'high';
   img.src = src;
   img.decode?.().catch(() => {});
 }
@@ -757,7 +907,7 @@ function preloadPackArt(roll) {
   for (const entry of roll?.entries || []) warmCardArt(entry.def);
 }
 
-// 封面图按需加载：卡池扩到 100 张后，不会在首屏一次性请求全部立绘。
+// 封面图按需加载：卡池扩到 271 张后，不会在首屏一次性请求全部立绘。
 const mascotPreview = new Image();
 mascotPreview.decoding = 'async';
 mascotPreview.src = MASCOT_CONFIG.image;
@@ -1364,7 +1514,22 @@ function spawnFlipBurst(cardObj) {
   const [sx, sy, persp] = stageToScreen(cardObj.pose.x.x, cardObj.pose.y.x, cardObj.pose.z.x + 24);
   const baseRadius = packWidth * 0.34 * persp;
 
-  if (rarity === 'secret') {
+  if (rarity === 'ultimate') {
+    ['#ffe7a4', '#ffd454', '#fff4cf', '#ff9f6e'].forEach((col, i) => {
+      shockRings.push({ x: sx, y: sy, r0: baseRadius * 0.3, r1: baseRadius * (2.9 + i * 0.55), age: -i * 0.06, life: 0.72, color: col, width: 5.4 - i * 0.9 });
+    });
+    emitScreenSparks(sx, sy, {
+      count: isCoarsePointer ? 42 : 72,
+      colors: ['#ffe7a4', '#ffd454', '#ffffff', '#ff9f6e', '#fff2c9'],
+      speedMin: 220,
+      speedMax: 780,
+      gravity: 500,
+      lifeMin: 0.5,
+      lifeMax: 1.05,
+      scaleMin: 0.9,
+      scaleMax: 1.9,
+    });
+  } else if (rarity === 'secret') {
     ['#ff5cd6', '#ffd454', '#5ce6ff'].forEach((col, i) => {
       shockRings.push({ x: sx, y: sy, r0: baseRadius * 0.35, r1: baseRadius * (2.5 + i * 0.45), age: -i * 0.055, life: 0.58, color: col, width: 4.5 - i * 0.8 });
     });
@@ -1413,9 +1578,15 @@ function spawnFlipBurst(cardObj) {
 
 function triggerStageImpact(rarity) {
   if (prefersReducedMotion) return;
-  const cls = rarity === 'secret' ? 'impact-secret' : rarity === 'ultra' ? 'impact-ultra' : '';
+  const cls = rarity === 'ultimate'
+    ? 'impact-ultimate'
+    : rarity === 'secret'
+      ? 'impact-secret'
+      : rarity === 'ultra'
+        ? 'impact-ultra'
+        : '';
   if (!cls) return;
-  stageEl.classList.remove('impact-ultra', 'impact-secret');
+  stageEl.classList.remove('impact-ultra', 'impact-secret', 'impact-ultimate');
   void stageEl.offsetWidth;
   stageEl.classList.add(cls);
 }
@@ -1427,6 +1598,7 @@ const PEEK_RARITY_NAMES = {
   holo: '全息虹彩',
   ultra: '极耀金芒',
   secret: '秘藏星迹',
+  ultimate: '终极大奖星息',
 };
 
 function shakePackPeek() {
@@ -1439,8 +1611,12 @@ function shakePackPeek() {
     stageState = 'idle';
   }
 
-  const { maxRank, topRarity, isGodPack } = currentPackRoll;
-  const auraColor = isGodPack ? 'rgba(255, 198, 58, 0.78)' : RARITY_META[topRarity].aura || 'rgba(130, 175, 255, 0.45)';
+  const { maxRank, topRarity, isGodPack, isUltimate } = currentPackRoll;
+  const auraColor = isUltimate
+    ? 'rgba(255, 216, 110, 0.9)'
+    : isGodPack
+      ? 'rgba(255, 198, 58, 0.78)'
+      : RARITY_META[topRarity].aura || 'rgba(130, 175, 255, 0.45)';
 
   // 给卡包物理摇晃冲量
   packPose.rz.v += (Math.random() < 0.5 ? -1 : 1) * (210 + maxRank * 35);
@@ -1458,13 +1634,17 @@ function shakePackPeek() {
     packAura.classList.remove('active');
   }, 1350);
 
-  const sparkColor = isGodPack ? '#ffd454' : RARITY_META[topRarity].shockColor;
+  const sparkColor = isUltimate ? '#ffe7a4' : isGodPack ? '#ffd454' : RARITY_META[topRarity].shockColor;
   for (let i = 0; i < 4; i++) {
     const [wx, wy, wz] = packLocalToStage(rand(18, 82), 8, 8);
     const [sx, sy] = stageToScreen(wx, wy, wz);
     emitScreenSparks(sx, sy, {
-      count: 4 + maxRank,
-      colors: isGodPack ? ['#ffd454', '#ff66dc', '#5ce6ff', '#ffffff'] : [sparkColor, '#ffffff'],
+      count: (isUltimate ? 10 : 4) + maxRank,
+      colors: isUltimate
+        ? ['#ffe7a4', '#ffffff', '#ffd454']
+        : isGodPack
+          ? ['#ffd454', '#ff66dc', '#5ce6ff', '#ffffff']
+          : [sparkColor, '#ffffff'],
       speedMin: 80,
       speedMax: 280 + maxRank * 35,
       gravity: 420,
@@ -1473,7 +1653,7 @@ function shakePackPeek() {
     });
   }
 
-  const label = isGodPack ? '欧皇全高罕星息' : PEEK_RARITY_NAMES[topRarity];
+  const label = isUltimate ? '终极大奖星息' : isGodPack ? '欧皇全高罕星息' : PEEK_RARITY_NAMES[topRarity];
   gestureHint.textContent = `星息感应：【${label}】· 拖动封条或点击「拆开封条」`;
   gestureHint.classList.remove('hidden');
 }
@@ -1511,19 +1691,20 @@ function buildCardMarkup(cardDef, { foilVariant = null, showNew = false } = {}) 
   const back = buildCardBackMarkup();
   const stampHtml = foilVariant ? `<span class="foil-stamp">${foilVariant.label}</span>` : '';
   const newHtml = showNew ? `<span class="new-badge">NEW</span>` : `<span class="new-badge" hidden>NEW</span>`;
+  const ultimateBadge = cardDef.ultimate ? '<span class="ultimate-ribbon">ULTIMATE PRIZE</span>' : '';
   const hasArtwork = Boolean(cardDef.artwork);
 
   if (cardDef.fullArtImage) {
     return (
       edges +
       back +
-      `<div class="card-face">${newHtml}${stampHtml}<img class="card-full-art" src="${cardDef.fullArtImage}" alt="${cardDef.name}">` +
+      `<div class="card-face">${newHtml}${stampHtml}${ultimateBadge}<img class="card-full-art" src="${cardDef.fullArtImage}" alt="${cardDef.name}">` +
       `<i class="foil-holo"></i><i class="foil-glare"></i><i class="foil-clearcoat"></i></div>`
     );
   }
 
   const artCover = hasArtwork
-    ? `<img class="art-cover" src="${cardDef.artwork}" alt="${cardDef.artworkAlt || `${cardDef.name}封面`}" decoding="async"` +
+    ? `<img class="art-cover" src="${cardDef.artwork}" alt="${cardDef.artworkAlt || `${cardDef.name}封面`}" decoding="async" fetchpriority="high"` +
       `${cardDef.artworkPosition ? ` style="object-position:${cardDef.artworkPosition}"` : ''}>`
     : '';
   const artFloorShadow = hasArtwork ? '' : '<i class="art-floor-shadow"></i>';
@@ -1535,7 +1716,7 @@ function buildCardMarkup(cardDef, { foilVariant = null, showNew = false } = {}) 
     edges +
     back +
     `<div class="card-face">` +
-    `${newHtml}${stampHtml}` +
+    `${newHtml}${stampHtml}${ultimateBadge}` +
     `<i class="card-inner-bevel"></i>` +
     `<div class="art-window">${artCover}<i class="art-vignette"></i>${artFloorShadow}</div>` +
     `<i class="foil-holo"></i>` +
@@ -1640,6 +1821,10 @@ function flipCard(cardObj, { silentBanner = false } = {}) {
     cardObj.newBadgeEl.hidden = false;
   }
 
+  if (def.ultimate) {
+    issueUltimateClaim(def);
+  }
+
   cardObj.el.setAttribute(
     'aria-label',
     `${def.fullName || def.name}，${def.rarityLabel}${foilVariant ? ' · ' + foilVariant.label : ''}，编号 ${def.serial}。点击可放大检视。`
@@ -1664,11 +1849,19 @@ function flipCard(cardObj, { silentBanner = false } = {}) {
     cardObj.el.style.setProperty('--surge-color', RARITY_META[def.rarity].shockColor || '#ffd454');
     cardObj.el.classList.add('rank-surge');
     setTimeout(() => cardObj.el.classList.remove('rank-surge'), 900);
-    flashStage(RARITY_META[def.rarity].shockColor || '#ffd454', rank >= 5 ? 0.95 : 0.68);
-    pulseHaptics(rank >= 5 ? [20, 36, 22] : [14, 24]);
+    flashStage(RARITY_META[def.rarity].shockColor || '#ffd454', rank >= 6 ? 1.45 : rank >= 5 ? 0.95 : 0.68);
+    pulseHaptics(rank >= 6 ? [34, 52, 30, 70, 36] : rank >= 5 ? [20, 36, 22] : [14, 24]);
   }
 
-  if (!silentBanner && rank >= 4) {
+  if (def.ultimate) {
+    if (!prefersReducedMotion) {
+      cardObj.el.classList.add('ultimate-reveal');
+      setTimeout(() => cardObj.el.classList.remove('ultimate-reveal'), 1500);
+    }
+    if (!silentBanner) {
+      showPullBanner('ULTIMATE JACKPOT', `终极大奖 · ${def.name} · 一杯奶茶的契约`, 5200);
+    }
+  } else if (!silentBanner && rank >= 4) {
     showPullBanner(
       def.rarity === 'secret' ? 'SECRET CONSTELLATION' : 'ULTRA RARE HIT',
       `${def.rarity === 'secret' ? '秘藏星灵降临' : '极耀星灵'} · ${def.name}${foilVariant ? ' (' + foilVariant.label + ')' : ''}`
@@ -1689,7 +1882,7 @@ function spawnPackCards() {
     const { def, foilVariant } = entry;
     const meta = RARITY_META[def.rarity];
     const el = document.createElement('div');
-    el.className = `card rarity-${def.rarity} unrevealed${foilVariant ? ` variant-${foilVariant.key}` : ''}${def.artwork ? ' artwork-card' : ''}`;
+    el.className = `card rarity-${def.rarity} unrevealed${foilVariant ? ` variant-${foilVariant.key}` : ''}${def.artwork ? ' artwork-card' : ''}${def.ultimate ? ' ultimate-card' : ''}`;
     el.style.setProperty('--card-frame-bg', def.frameBg);
     el.style.setProperty('--card-plaque-bg', def.plaqueBg || 'rgba(20, 20, 28, 0.92)');
     el.style.setProperty('--card-edge-color', def.edgeColor);
@@ -1904,7 +2097,7 @@ function spawnShowcaseCard(def, foilLabel = null) {
     : binderBtn;
   const foilVariant = FOIL_VARIANTS.find((f) => f.label === foilLabel) || null;
   const el = document.createElement('div');
-  el.className = `card showcase-card rarity-${def.rarity} settled revealed front-visible${foilVariant ? ` variant-${foilVariant.key}` : ''}${def.artwork ? ' artwork-card' : ''}`;
+  el.className = `card showcase-card rarity-${def.rarity} settled revealed front-visible${foilVariant ? ` variant-${foilVariant.key}` : ''}${def.artwork ? ' artwork-card' : ''}${def.ultimate ? ' ultimate-card' : ''}`;
   el.style.setProperty('--card-frame-bg', def.frameBg);
   el.style.setProperty('--card-plaque-bg', def.plaqueBg || 'rgba(20, 20, 28, 0.92)');
   el.style.setProperty('--card-edge-color', def.edgeColor);
@@ -2046,7 +2239,7 @@ function renderBinderGrid() {
     const countTag = unlocked ? `<span class="binder-count-pill">×${rec.count}</span>` : '';
 
     return `<button
-      class="binder-slot ${unlocked ? 'unlocked' : 'locked'}${def.artwork ? ' has-artwork' : ''}"
+      class="binder-slot ${unlocked ? 'unlocked' : 'locked'}${def.artwork ? ' has-artwork' : ''}${def.ultimate ? ' binder-slot--ultimate' : ''}"
       type="button"
       data-card-id="${def.id}"
       data-rarity="${def.rarity}"
@@ -2138,6 +2331,48 @@ binderBackdrop.addEventListener('click', () => {
   closeBinder();
 });
 
+/* 终极大奖奶茶券：从图鉴顶部重新打开 */
+milkTeaBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  sound.call('click');
+  openClaimModal();
+});
+
+closeClaimBtn?.addEventListener('click', () => {
+  sound.call('click');
+  closeClaim();
+});
+
+claimAcceptBtn?.addEventListener('click', () => {
+  sound.call('click');
+  closeClaim();
+});
+
+claimBackdrop?.addEventListener('click', () => {
+  closeClaim();
+});
+
+copyClaimBtn?.addEventListener('click', () => {
+  sound.call('click');
+  copyClaimCode();
+});
+
+claimModal?.addEventListener('keydown', (e) => {
+  if (e.key !== 'Tab') return;
+  const focusable = [...claimModal.querySelectorAll('button:not([disabled]):not([hidden]), [href], [tabindex]:not([tabindex="-1"])')]
+    .filter((el) => el.offsetParent !== null);
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault();
+    first.focus();
+  }
+});
+
 /* ---------- 星钻补给站 ---------- */
 walletBtn?.addEventListener('click', (e) => {
   e.stopPropagation();
@@ -2215,6 +2450,13 @@ binderMoreBtn?.addEventListener('click', () => {
 function resetBinderArchive() {
   binderState = { packsOpened: 0, pitySinceUltra: 0, owned: {} };
   saveBinderState();
+  clearTimeout(claimOpenTimer);
+  if (!claimModal.hidden) closeClaim({ restoreFocus: false });
+  ultimateClaim = null;
+  try {
+    localStorage.removeItem(ULTIMATE_CLAIM_KEY);
+  } catch {}
+  updateMilkTeaButton();
   updateHud();
   renderBinderGrid();
   showToast('星灵图鉴已重置，新的星轨从此刻开始');
@@ -2444,6 +2686,8 @@ function triggerPackBurst() {
   openBtn.hidden = true;
   packAura.classList.remove('active', 'god-mode');
   stageEl.classList.add('cards-live');
+  document.body.classList.add('reveal-mode');
+  setTimeout(() => document.body.classList.remove('reveal-mode'), 1650);
 
   // 结算开包计数与保底进度
   binderState.packsOpened += 1;
@@ -2460,16 +2704,20 @@ function triggerPackBurst() {
   updateTearClips(1);
   grabZone.disabled = true;
 
-  if (currentPackRoll.isGodPack) {
+  if (currentPackRoll.isGodPack && !currentPackRoll.isUltimate) {
     showPullBanner('OMNI PACK RELEASED', '欧皇全高罕星匣 · 五道星光同时降临', 3600);
   }
 
   const burstRarity = currentPackRoll.topRarity || 'common';
   const burstMeta = RARITY_META[burstRarity] || RARITY_META.common;
-  const burstColor = currentPackRoll.isGodPack ? '#ffd454' : burstMeta.shockColor || '#5ce6ff';
+  const burstColor = currentPackRoll.isUltimate
+    ? '#ffe7a4'
+    : currentPackRoll.isGodPack
+      ? '#ffd454'
+      : burstMeta.shockColor || '#5ce6ff';
   if (!prefersReducedMotion && (currentPackRoll.isGodPack || RARITY_META[burstRarity].rank >= 3)) {
-    flashStage(burstColor, currentPackRoll.isGodPack ? 1.15 : 0.7);
-    pulseHaptics(currentPackRoll.isGodPack ? [24, 36, 22] : [14, 22]);
+    flashStage(burstColor, currentPackRoll.isUltimate ? 1.35 : currentPackRoll.isGodPack ? 1.15 : 0.7);
+    pulseHaptics(currentPackRoll.isUltimate ? [30, 46, 26] : currentPackRoll.isGodPack ? [24, 36, 22] : [14, 22]);
   }
 
   liveStatus.textContent = `${currentTheme.name} 星匣已拆开，点击发光的卡背揭晓星灵。`;
@@ -2513,7 +2761,7 @@ function triggerPackBurst() {
       scaleMin: 0.75,
       scaleMax: 1.5,
     });
-    triggerStageImpact(currentPackRoll.isGodPack ? 'secret' : burstRarity);
+    triggerStageImpact(currentPackRoll.isUltimate ? 'ultimate' : currentPackRoll.isGodPack ? 'secret' : burstRarity);
   }
 
   spawnPackCards();
@@ -2578,14 +2826,21 @@ flipAllBtn.addEventListener('click', (e) => {
           flipAllBtn.textContent = '一键翻开';
           againBtn.disabled = false;
           if (topCard && RARITY_META[topCard.def.rarity].rank >= 4) {
+            const isUltimate = Boolean(topCard.def.ultimate);
             const isSecret = topCard.def.rarity === 'secret';
-            showPullBanner(
-              isSecret ? 'SECRET CONSTELLATION' : 'ULTRA RARE HIT',
-              `${isSecret ? '秘藏星灵降临' : '极耀星灵'} · ${topCard.def.name}`,
-              3200
-            );
-            flashStage(RARITY_META[topCard.def.rarity].shockColor || '#ffd454', isSecret ? 1.05 : 0.8);
-            pulseHaptics(isSecret ? [22, 42, 26] : [16, 26]);
+            if (isUltimate) {
+              showPullBanner('ULTIMATE JACKPOT', `终极大奖 · ${topCard.def.name} · 一杯奶茶的契约`, 5200);
+              flashStage('#ffe7a4', 1.45);
+              pulseHaptics([34, 52, 30, 70, 36]);
+            } else {
+              showPullBanner(
+                isSecret ? 'SECRET CONSTELLATION' : 'ULTRA RARE HIT',
+                `${isSecret ? '秘藏星灵降临' : '极耀星灵'} · ${topCard.def.name}`,
+                3200
+              );
+              flashStage(RARITY_META[topCard.def.rarity].shockColor || '#ffd454', isSecret ? 1.05 : 0.8);
+              pulseHaptics(isSecret ? [22, 42, 26] : [16, 26]);
+            }
           }
         }, 300);
       }
@@ -2763,6 +3018,10 @@ window.addEventListener('resize', () => {
 
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
+    if (!claimModal.hidden) {
+      closeClaim();
+      return;
+    }
     if (!shopModal.hidden) {
       closeShop();
       return;
@@ -3271,6 +3530,7 @@ function tick(nowMs) {
 measureStage();
 enterFreshPack();
 updateWalletUI();
+updateMilkTeaButton();
 if (walletIsFresh) {
   saveWallet();
   setTimeout(() => showToast('新手补给 · 1,200 星钻已到账，首包免费', 4200), 900);

@@ -1,7 +1,7 @@
 # Honor of Kings sample covers
 
 This folder contains the 170 covers used by the VESPER archive Honor of Kings
-cards, serials `101/270`–`270/270`.
+cards, serials `101/271`–`270/271`.
 
 ## Counts
 
