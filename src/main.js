@@ -1,10 +1,22 @@
-import { PACK_BRAND, PACK_THEMES, RARITY_META, MASCOT_CONFIG, CARD_POOL } from './cards-config.js';
+import { PACK_BRAND, PACK_THEMES, RARITY_META, MASCOT_CONFIG, CARD_POOL, TOTAL_CARD_SLOTS } from './cards-config.js';
 import { createSoundController } from './sound.js';
 
 const $ = (sel) => document.querySelector(sel);
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 const rand = (min, max) => min + Math.random() * (max - min);
 const pickOne = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+const BINDER_BATCH = 24;
+const CARD_POOL_BY_SLOT = new Map(
+  CARD_POOL.map((def) => [Number.parseInt(def.serial, 10), def])
+);
+const BINDER_SLOTS = Array.from({ length: TOTAL_CARD_SLOTS }, (_, index) => {
+  const number = index + 1;
+  const def = CARD_POOL_BY_SLOT.get(number);
+  return def
+    ? { type: 'card', number, def, serial: def.serial }
+    : { type: 'reserved', number, serial: `${String(number).padStart(3, '0')}/${TOTAL_CARD_SLOTS}` };
+});
 
 const stageEl = $('#stage');
 const scene = $('#scene');
@@ -47,6 +59,9 @@ const binderGrid = $('#binderGrid');
 const binderStatsText = $('#binderStatsText');
 const binderProgressLabel = $('#binderProgressLabel');
 const binderFilterBtns = [...document.querySelectorAll('[data-binder-filter]')];
+const binderSearch = $('#binderSearch');
+const binderMoreBtn = $('#binderMoreBtn');
+const binderEmpty = $('#binderEmpty');
 const closeBinderBtn = $('#closeBinderBtn');
 const resetBinderBtn = $('#resetBinderBtn');
 
@@ -69,7 +84,9 @@ function showToast(message, duration = 2200) {
 function syncBinderFilterCounts() {
   for (const btn of binderFilterBtns) {
     const key = btn.dataset.binderFilter;
-    const count = key === 'all' ? CARD_POOL.length : CARD_POOL.filter((def) => def.rarity === key).length;
+    let count = TOTAL_CARD_SLOTS;
+    if (key === 'reserved') count = BINDER_SLOTS.filter((slot) => slot.type === 'reserved').length;
+    else if (key !== 'all') count = CARD_POOL.filter((def) => def.rarity === key).length;
     const label = btn.querySelector('[data-filter-count]');
     if (label) label.textContent = String(count);
   }
@@ -200,6 +217,8 @@ let currentPackRoll = null; // { entries: [{ def, foilVariant }], isGodPack, max
 let bannerHideTimer = null;
 let peekAuraTimer = null;
 let binderFilter = 'all';
+let binderQuery = '';
+let binderVisibleCount = BINDER_BATCH;
 let binderReturnFocus = null;
 let resetConfirmTimer = null;
 let showcaseReturnFocus = null;
@@ -226,8 +245,8 @@ function recordCardUnlock(def, foilVariant) {
 
 function updateHud() {
   const unlockedCount = Object.keys(binderState.owned).length;
-  const pct = Math.round((unlockedCount / CARD_POOL.length) * 100);
-  binderCountEl.textContent = `${unlockedCount} / ${CARD_POOL.length}`;
+  const pct = Math.round((unlockedCount / TOTAL_CARD_SLOTS) * 100);
+  binderCountEl.textContent = `${unlockedCount} / ${TOTAL_CARD_SLOTS}`;
   binderBtn.style.setProperty('--binder-pct', `${pct}%`);
   updateBinderProgress();
 
@@ -342,6 +361,7 @@ function generatePackRoll({ forceGod = false } = {}) {
     }
   }
 
+  preloadPackArt({ entries });
   return { entries, isGodPack, maxRank, topRarity };
 }
 
@@ -423,16 +443,27 @@ mascotSlot.innerHTML = buildRigMarkup(MASCOT_CONFIG, { withShadow: true, withOuc
 const packEyes = [...mascotSlot.querySelectorAll('.rig-eye')];
 const packPupils = [...mascotSlot.querySelectorAll('.rig-pupil')];
 
-const preloadedImages = [
-  MASCOT_CONFIG.image,
-  ...CARD_POOL.flatMap((c) => [c.fullArtImage, c.artwork, c.character?.image].filter(Boolean)),
-].map((src) => {
+const warmedCardArt = new Set();
+
+function warmCardArt(def) {
+  const src = def?.fullArtImage || def?.artwork || def?.character?.image;
+  if (!src || warmedCardArt.has(src)) return;
+  warmedCardArt.add(src);
   const img = new Image();
+  img.decoding = 'async';
   img.src = src;
   img.decode?.().catch(() => {});
-  return img;
-});
-void preloadedImages;
+}
+
+function preloadPackArt(roll) {
+  for (const entry of roll?.entries || []) warmCardArt(entry.def);
+}
+
+// 封面图按需加载：卡池扩到 100 张后，不会在首屏一次性请求全部立绘。
+const mascotPreview = new Image();
+mascotPreview.decoding = 'async';
+mascotPreview.src = MASCOT_CONFIG.image;
+mascotPreview.decode?.().catch(() => {});
 
 /* ---------- 阻尼弹簧求解器 ---------- */
 class SpringValue {
@@ -1623,34 +1654,81 @@ function dismissShowcaseCard() {
 
 function updateBinderProgress() {
   if (!binderProgressLabel) return;
-  if (binderFilter === 'all') {
-    const unlockedCount = Object.keys(binderState.owned).length;
-    binderProgressLabel.textContent = `COLLECTION ${Math.round((unlockedCount / CARD_POOL.length) * 100)}%`;
-    return;
-  }
-  const visible = CARD_POOL.filter((def) => def.rarity === binderFilter).length;
-  binderProgressLabel.textContent = `SHOWING ${visible} OF ${CARD_POOL.length}`;
+  const unlockedCount = Object.keys(binderState.owned).length;
+  binderProgressLabel.textContent = `COLLECTION ${Math.round((unlockedCount / TOTAL_CARD_SLOTS) * 100)}%`;
 }
 
-function applyBinderFilter(filter) {
-  binderFilter = CARD_POOL.some((def) => def.rarity === filter) ? filter : 'all';
+function setBinderFilterButtons() {
   binderFilterBtns.forEach((btn) => {
     btn.setAttribute('aria-pressed', String(btn.dataset.binderFilter === binderFilter));
   });
-  const slots = [...binderGrid.querySelectorAll('.binder-slot')];
-  for (const slot of slots) {
-    slot.hidden = binderFilter !== 'all' && slot.dataset.rarity !== binderFilter;
-  }
-  updateBinderProgress();
+}
+
+function getFilteredBinderSlots() {
+  const query = binderQuery.trim().toLowerCase();
+  return BINDER_SLOTS.filter((slot) => {
+    if (binderFilter === 'reserved' && slot.type !== 'reserved') return false;
+    if (binderFilter !== 'all' && binderFilter !== 'reserved') {
+      if (slot.type !== 'card' || slot.def.rarity !== binderFilter) return false;
+    }
+    if (!query) return true;
+    if (slot.type === 'reserved') {
+      return `预留 待补位 reserved ${slot.serial} ${slot.number}`.toLowerCase().includes(query);
+    }
+    const def = slot.def;
+    return [def.name, def.fullName, def.tag, def.trait, def.serial, def.rarityLabel]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+      .includes(query);
+  });
+}
+
+function applyBinderFilter(filter) {
+  const allowed = filter === 'all' || filter === 'reserved' || Boolean(RARITY_META[filter]);
+  binderFilter = allowed ? filter : 'all';
+  binderVisibleCount = BINDER_BATCH;
+  setBinderFilterButtons();
+  renderBinderGrid();
+  binderGrid.closest('.binder-scroll')?.scrollTo({ top: 0 });
 }
 
 function renderBinderGrid() {
   const unlockedCount = Object.keys(binderState.owned).length;
   const totalCards = Object.values(binderState.owned).reduce((sum, rec) => sum + rec.count, 0);
   const foilKinds = new Set(Object.values(binderState.owned).flatMap((rec) => rec.foils || [])).size;
-  binderStatsText.textContent = `已拆 ${binderState.packsOpened} 包 · 收录 ${unlockedCount} / ${CARD_POOL.length} 位星灵 · 累计 ${totalCards} 张${foilKinds ? ` · 异画 ${foilKinds} 种` : ''}`;
+  binderStatsText.textContent = `收录 ${unlockedCount} / ${TOTAL_CARD_SLOTS} 位星灵 · 已开放 ${CARD_POOL.length} 位 · 已拆 ${binderState.packsOpened} 包 · 累计 ${totalCards} 张${foilKinds ? ` · 异画 ${foilKinds} 种` : ''}`;
 
-  binderGrid.innerHTML = CARD_POOL.map((def) => {
+  const filteredSlots = getFilteredBinderSlots();
+  const visibleSlots = filteredSlots.slice(0, binderVisibleCount);
+
+  binderGrid.innerHTML = visibleSlots.map((slot) => {
+    if (slot.type === 'reserved') {
+      const label = `预留卡位 ${slot.serial}`;
+      return `<button
+        class="binder-slot reserved"
+        type="button"
+        data-rarity="reserved"
+        data-slot="${slot.number}"
+        aria-label="${label}，等待补全名字与封面"
+        title="${label} · 等待补全"
+        disabled
+      >
+        <div class="binder-art reserved-art" aria-hidden="true">
+          <span class="reserved-glyph">✦</span>
+          <span class="reserved-kicker">RESERVED SLOT</span>
+        </div>
+        <div class="binder-plaque">
+          <span class="binder-meta-name">待补位</span>
+          <div class="binder-meta-sub">
+            <span>NO. ${slot.serial}</span>
+            <span>预留</span>
+          </div>
+        </div>
+      </button>`;
+    }
+
+    const def = slot.def;
     const rec = binderState.owned[def.id];
     const unlocked = Boolean(rec);
     const fullName = def.fullName || `${def.name} · ${def.tag}`;
@@ -1686,8 +1764,17 @@ function renderBinderGrid() {
     </button>`;
   }).join('');
 
-  applyBinderFilter(binderFilter);
-  updateBinderProgress();
+  if (binderEmpty) binderEmpty.hidden = filteredSlots.length > 0;
+  if (binderMoreBtn) {
+    const remaining = filteredSlots.length - visibleSlots.length;
+    binderMoreBtn.hidden = remaining <= 0;
+    binderMoreBtn.textContent = `展开更多星位 · 还有 ${remaining} 位`;
+  }
+  if (binderProgressLabel) {
+    binderProgressLabel.textContent = binderFilter !== 'all' || binderQuery.trim()
+      ? `SHOWING ${filteredSlots.length} / ${TOTAL_CARD_SLOTS}`
+      : `COLLECTION ${Math.round((unlockedCount / TOTAL_CARD_SLOTS) * 100)}%`;
+  }
 }
 
 function setBinderOpenChrome(isOpen) {
@@ -1701,7 +1788,13 @@ function openBinder() {
   sound.call('click');
   zoomedCard = null;
   dismissShowcaseCard();
+  binderFilter = 'all';
+  binderQuery = '';
+  binderVisibleCount = BINDER_BATCH;
+  if (binderSearch) binderSearch.value = '';
+  setBinderFilterButtons();
   renderBinderGrid();
+  binderGrid.closest('.binder-scroll')?.scrollTo({ top: 0 });
   binderModal.hidden = false;
   setBinderOpenChrome(true);
   document.body.classList.add('binder-open');
@@ -1746,6 +1839,19 @@ binderFilterBtns.forEach((btn) => {
     sound.call('click');
     applyBinderFilter(next);
   });
+});
+
+binderSearch?.addEventListener('input', () => {
+  binderQuery = binderSearch.value;
+  binderVisibleCount = BINDER_BATCH;
+  renderBinderGrid();
+  binderGrid.closest('.binder-scroll')?.scrollTo({ top: 0 });
+});
+
+binderMoreBtn?.addEventListener('click', () => {
+  sound.call('click');
+  binderVisibleCount += BINDER_BATCH;
+  renderBinderGrid();
 });
 
 function resetBinderArchive() {
@@ -1797,7 +1903,7 @@ binderGrid.addEventListener('click', (e) => {
 
 binderModal.addEventListener('keydown', (e) => {
   if (e.key !== 'Tab') return;
-  const focusable = [...binderModal.querySelectorAll('button:not([disabled]):not([hidden]), [href], [tabindex]:not([tabindex="-1"])')]
+  const focusable = [...binderModal.querySelectorAll('button:not([disabled]):not([hidden]), input:not([disabled]):not([hidden]), [href], [tabindex]:not([tabindex="-1"])')]
     .filter((el) => el.offsetParent !== null);
   if (!focusable.length) return;
   const first = focusable[0];

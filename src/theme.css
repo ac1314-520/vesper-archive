@@ -1014,6 +1014,43 @@ html[data-studio-light="day"] .stage-plinth::after {
   pointer-events: none;
 }
 
+.binder-empty {
+  margin: 34px 0 24px;
+  color: var(--vesper-muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.binder-more {
+  display: block;
+  width: min(380px, 100%);
+  height: 34px;
+  margin: 16px auto 2px;
+  border: 1px solid rgba(225, 205, 161, 0.16);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--vesper-gold);
+  font-family: var(--font-ui);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background-color 0.18s, border-color 0.18s, color 0.18s;
+}
+
+.binder-more:hover {
+  border-color: rgba(225, 205, 161, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--vesper-gold-bright);
+}
+
+.binder-more:focus-visible {
+  outline: 1.5px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
 .card-back {
   color: #e5d3aa;
   background:
@@ -1361,7 +1398,8 @@ html[data-studio-light="day"] .pity-meter.pity-ready .console-val {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
   padding: 12px clamp(18px, 2.8vw, 34px);
   border-bottom: 1px solid var(--vesper-line);
   background: rgba(255, 255, 255, 0.012);
@@ -1372,6 +1410,56 @@ html[data-studio-light="day"] .pity-meter.pity-ready .console-val {
   align-items: center;
   gap: 4px;
   min-width: 0;
+  flex-wrap: wrap;
+}
+
+.binder-search {
+  flex: 1 1 170px;
+  max-width: 220px;
+  min-width: 160px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 9px;
+  border: 1px solid var(--vesper-line);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.022);
+  color: var(--vesper-muted);
+  transition: border-color 0.18s, background-color 0.18s;
+}
+
+.binder-search:focus-within {
+  border-color: rgba(216, 192, 138, 0.42);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.binder-search svg {
+  flex: 0 0 auto;
+  opacity: 0.62;
+}
+
+.binder-search input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--vesper-ivory);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.03em;
+}
+
+.binder-search input::placeholder {
+  color: var(--vesper-muted);
+  opacity: 0.7;
+}
+
+.binder-search input::-webkit-search-cancel-button {
+  filter: invert(0.7);
+  opacity: 0.6;
 }
 
 .binder-filter {
@@ -1473,6 +1561,62 @@ html[data-studio-light="day"] .pity-meter.pity-ready .console-val {
     linear-gradient(155deg, #12121a, #0c0c12);
   border-color: rgba(255, 255, 255, 0.055);
   opacity: 0.82;
+}
+
+.binder-slot.reserved {
+  cursor: default;
+  opacity: 0.76;
+  background:
+    linear-gradient(155deg, rgba(26, 24, 34, 0.84), rgba(10, 10, 15, 0.94));
+  border-color: rgba(226, 204, 158, 0.075);
+  border-style: dashed;
+}
+
+.binder-slot.reserved .binder-art {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  align-items: center;
+  justify-content: center;
+  border-color: rgba(226, 204, 158, 0.08);
+  border-style: dashed;
+  background:
+    radial-gradient(70% 55% at 50% 50%, rgba(216, 192, 138, 0.055), transparent 72%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 12px),
+    linear-gradient(160deg, rgba(27, 25, 37, 0.76), rgba(10, 10, 15, 0.9));
+}
+
+.reserved-glyph {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2.8vw, 36px);
+  line-height: 1;
+  color: rgba(228, 207, 163, 0.22);
+  text-shadow: 0 0 18px rgba(228, 207, 163, 0.12);
+}
+
+.reserved-kicker {
+  color: rgba(228, 207, 163, 0.27);
+  font-family: var(--font-mono);
+  font-size: 6.5px;
+  letter-spacing: 0.17em;
+}
+
+.binder-slot.reserved .binder-plaque {
+  border-color: rgba(226, 204, 158, 0.07);
+  border-style: dashed;
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.binder-slot.reserved .binder-meta-name {
+  color: rgba(242, 237, 226, 0.36);
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+.binder-slot.reserved .binder-meta-sub {
+  color: rgba(242, 237, 226, 0.3);
 }
 
 .binder-art {
@@ -1971,6 +2115,14 @@ html[data-perf="lite"] .binder-slot.unlocked {
   .binder-toolbar {
     padding: 9px 12px;
     overflow: hidden;
+  }
+
+  .binder-search {
+    order: 3;
+    flex: 1 1 100%;
+    max-width: none;
+    min-width: 0;
+    height: 27px;
   }
 
   .binder-filters {
