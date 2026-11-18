@@ -1676,7 +1676,7 @@ function getFilteredBinderSlots() {
       return `预留 待补位 reserved ${slot.serial} ${slot.number}`.toLowerCase().includes(query);
     }
     const def = slot.def;
-    return [def.name, def.fullName, def.tag, def.trait, def.serial, def.rarityLabel]
+    return [def.name, def.fullName, def.tag, def.trait, def.serial, def.rarityLabel, def.category]
       .filter(Boolean)
       .join(' ')
       .toLowerCase()
@@ -1697,7 +1697,7 @@ function renderBinderGrid() {
   const unlockedCount = Object.keys(binderState.owned).length;
   const totalCards = Object.values(binderState.owned).reduce((sum, rec) => sum + rec.count, 0);
   const foilKinds = new Set(Object.values(binderState.owned).flatMap((rec) => rec.foils || [])).size;
-  binderStatsText.textContent = `收录 ${unlockedCount} / ${TOTAL_CARD_SLOTS} 位星灵 · 已开放 ${CARD_POOL.length} 位 · 已拆 ${binderState.packsOpened} 包 · 累计 ${totalCards} 张${foilKinds ? ` · 异画 ${foilKinds} 种` : ''}`;
+  binderStatsText.textContent = `收录 ${unlockedCount} / ${TOTAL_CARD_SLOTS} 位星灵 · 已拆 ${binderState.packsOpened} 包 · 累计 ${totalCards} 张${foilKinds ? ` · 异画 ${foilKinds} 种` : ''}`;
 
   const filteredSlots = getFilteredBinderSlots();
   const visibleSlots = filteredSlots.slice(0, binderVisibleCount);

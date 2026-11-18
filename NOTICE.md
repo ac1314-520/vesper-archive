@@ -43,3 +43,24 @@ illustrative, or font assets.
 client for sample-card evaluation. They are not authored by this project and are
 **not** covered by the MIT license. Confirm the appropriate rights before making
 the site public. Replace them with licensed artwork if needed.
+
+## Golden Spatula / Teamfight Tactics sample covers
+
+`assets/golden-spatula/` contains 82 sample covers and the card metadata under
+`src/golden-spatula-cards.js`. The character, arena, and board artwork is the
+property of Riot Games / Tencent and was collected from public promotional
+material, the official Tencent event pages, and the PHAROS League wiki:
+
+- <https://pharos.wiki/lol/zh-CN/cosmetics/little-legends>
+- <https://lol.qq.com/act/a20241121checkerboard/index.html>
+- <https://news.17173.com/content/08212024/151505151.shtml>
+- <https://www.vgover.com/news/237663>
+
+These files are included for a personal, non-commercial fan showcase only. They
+are **not** covered by the MIT license. Do not sell, license, or redistribute
+them commercially. If you are a rights holder and want a cover removed, open an
+issue in the repository and it will be replaced.
+
+The original VESPER brand, original 18 procedural characters, interface, and
+code remain independent of these third-party sample assets.
+

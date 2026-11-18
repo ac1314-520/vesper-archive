@@ -1,9 +1,9 @@
 /**
  * VESPER · 长庚秘藏 — 卡池、概率与主题的唯一数据入口
  *
- * 100 席星灵档案：当前已开放 18 席（6 Common · 5 Rare · 3 Holo · 2 Ultra · 2 Secret），
- * 019–100 为预留卡位，可逐张补入名字与封面，不需要改抽卡引擎。
- * 新增卡面由 MIT 许可的 SDF 渲染脚本生成，不依赖任何外部图片库。
+ * 100 席星灵档案现已全部填充：18 位 VESPER 原创星灵 + 82 张金铲铲 / 云顶之弈收藏样卡。
+ * 收藏样卡的名称、分类与封面集中在 `src/golden-spatula-cards.js`。
+ * 新增或替换角色时不需要改抽卡引擎。
  *
  * 自定义卡面支持三种方式：
  * 1. `character`：透明角色立绘，沿用 3D 表情绑定。
@@ -11,6 +11,8 @@
  * 3. `fullArtImage`：整张卡面直出，不再叠加铭牌排版。
  * 可选 `fullName` 用于完整长名的悬停提示与无障碍标签。
  */
+
+import { GOLDEN_SPATULA_CARDS } from './golden-spatula-cards.js';
 
 export const TOTAL_CARD_SLOTS = 100;
 
@@ -479,5 +481,6 @@ export const CARD_POOL = [
       rigged: false,
     },
   },
+  ...GOLDEN_SPATULA_CARDS,
 ];
 
