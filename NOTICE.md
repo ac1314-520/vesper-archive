@@ -76,3 +76,20 @@ issue in the repository and it will be replaced.
 The original VESPER brand, original 18 procedural characters, interface, and
 code remain independent of these third-party sample assets.
 
+## Honor of Kings sample covers
+
+`assets/honor-of-kings/` contains 170 Honor of Kings skin covers and the card
+metadata under `src/honor-of-kings-cards.js`. The character and skin artwork is
+the property of Tencent / TiMi Studio Group and was collected from official
+hero skin pages, the official skin showcase, and public promotional material.
+
+The set covers all 20 Glory Collection skins, the Precious Unparalleled skin,
+14 Unparalleled skins, 12 Precious Legend skins, plus 23 Legend, 50 Epic, and
+50 Brave sample skins. These files are included for a personal, non-commercial
+fan showcase only and are **not** covered by the MIT license. Do not sell,
+license, or redistribute them commercially. Rights holders may open an issue to
+request replacement of any cover.
+
+See `assets/honor-of-kings/sources.json` for per-card source records.
+
+

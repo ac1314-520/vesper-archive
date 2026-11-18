@@ -1,8 +1,10 @@
 /**
  * VESPER · 长庚秘藏 — 卡池、概率与主题的唯一数据入口
  *
- * 100 席星灵档案现已全部填充：18 位 VESPER 原创星灵 + 82 张金铲铲 / 云顶之弈收藏样卡。
- * 收藏样卡的名称、分类与封面集中在 `src/golden-spatula-cards.js`。
+ * 270 席星灵档案现已全部填充：
+ * 18 位 VESPER 原创星灵 + 82 张金铲铲 / 云顶之弈收藏样卡 + 170 张王者荣耀皮肤样卡。
+ * 收藏样卡的名称、分类与封面分别集中在 `golden-spatula-cards.js`
+ * 与 `honor-of-kings-cards.js`。
  * 新增或替换角色时不需要改抽卡引擎。
  *
  * 自定义卡面支持三种方式：
@@ -12,9 +14,10 @@
  * 可选 `fullName` 用于完整长名的悬停提示与无障碍标签。
  */
 
-import { GOLDEN_SPATULA_CARDS } from './golden-spatula-cards.js?v=20261118g';
+import { GOLDEN_SPATULA_CARDS } from './golden-spatula-cards.js?v=20261118h';
+import { HONOR_OF_KINGS_CARDS } from './honor-of-kings-cards.js?v=20261118h';
 
-export const TOTAL_CARD_SLOTS = 100;
+export const TOTAL_CARD_SLOTS = 270;
 
 export const PACK_BRAND = {
   logo: 'VESPER',
@@ -23,7 +26,7 @@ export const PACK_BRAND = {
   footerLeft: 'PRIVATE CONSTELLATION // S01',
   footerRight: '5 FOIL CARDS',
   microSpec: 'ASTRAL EDITION · HOLO OR HIGHER',
-  backHeadline: '100 Archival Slots\nOne Private Constellation',
+  backHeadline: '270 Archival Slots\nOne Private Constellation',
   backSpec: 'VESPER ARCHIVE · EDITION 2026 · LOT 01',
 };
 
@@ -58,7 +61,7 @@ export const CARD_POOL = [
     name: 'Mochi',
     tag: '团火',
     trait: '初生暖焰 · Ember Puff',
-    serial: '001/100',
+    serial: '001/270',
     rarity: 'common',
     rarityMark: '◆',
     rarityLabel: 'COMMON',
@@ -83,7 +86,7 @@ export const CARD_POOL = [
     name: 'Voxel',
     tag: '方砾',
     trait: '晶格构筑 · Jade Tessera',
-    serial: '002/100',
+    serial: '002/270',
     rarity: 'common',
     rarityMark: '◆',
     rarityLabel: 'COMMON',
@@ -108,7 +111,7 @@ export const CARD_POOL = [
     name: 'Sprout',
     tag: '新芽',
     trait: '晨露初生 · Canopy Dew',
-    serial: '003/100',
+    serial: '003/270',
     rarity: 'common',
     rarityMark: '◆',
     rarityLabel: 'COMMON',
@@ -133,7 +136,7 @@ export const CARD_POOL = [
     name: 'Nimbus',
     tag: '云屿',
     trait: '高空流云 · Stratosphere',
-    serial: '004/100',
+    serial: '004/270',
     rarity: 'common',
     rarityMark: '◆',
     rarityLabel: 'COMMON',
@@ -157,7 +160,7 @@ export const CARD_POOL = [
     name: 'Lumen',
     tag: '烛守',
     trait: '守夜微光 · Lantern Wisp',
-    serial: '005/100',
+    serial: '005/270',
     rarity: 'common',
     rarityMark: '◆',
     rarityLabel: 'COMMON',
@@ -182,7 +185,7 @@ export const CARD_POOL = [
     name: 'Mori',
     tag: '森眠',
     trait: '月下蕈语 · Moonlit Spore',
-    serial: '006/100',
+    serial: '006/270',
     rarity: 'common',
     rarityMark: '◆',
     rarityLabel: 'COMMON',
@@ -207,7 +210,7 @@ export const CARD_POOL = [
     name: 'Ember',
     tag: '熔核',
     trait: '熔核炽羽 · Magma Core',
-    serial: '007/100',
+    serial: '007/270',
     rarity: 'rare',
     rarityMark: '◆◆',
     rarityLabel: 'RARE',
@@ -232,7 +235,7 @@ export const CARD_POOL = [
     name: 'Tide',
     tag: '汐痕',
     trait: '深海潮汐 · Pelagic Pulse',
-    serial: '008/100',
+    serial: '008/270',
     rarity: 'rare',
     rarityMark: '◆◆',
     rarityLabel: 'RARE',
@@ -257,7 +260,7 @@ export const CARD_POOL = [
     name: 'Facet',
     tag: '晶语',
     trait: '紫晶折射 · Geode Prism',
-    serial: '009/100',
+    serial: '009/270',
     rarity: 'rare',
     rarityMark: '◆◆',
     rarityLabel: 'RARE',
@@ -282,7 +285,7 @@ export const CARD_POOL = [
     name: 'Kite',
     tag: '逐星',
     trait: '逐星纸鸢 · Comet Kite',
-    serial: '010/100',
+    serial: '010/270',
     rarity: 'rare',
     rarityMark: '◆◆',
     rarityLabel: 'RARE',
@@ -307,7 +310,7 @@ export const CARD_POOL = [
     name: 'Lune',
     tag: '弦月',
     trait: '弦月低语 · Silver Crescent',
-    serial: '011/100',
+    serial: '011/270',
     rarity: 'rare',
     rarityMark: '◆◆',
     rarityLabel: 'RARE',
@@ -329,7 +332,7 @@ export const CARD_POOL = [
     name: 'Orbit',
     tag: '星环',
     trait: '星环巡游 · Celestial Ring',
-    serial: '012/100',
+    serial: '012/270',
     rarity: 'holo',
     rarityMark: '◆◆◆',
     rarityLabel: 'HOLO RARE',
@@ -355,7 +358,7 @@ export const CARD_POOL = [
     name: 'Vortex',
     tag: '涡心',
     trait: '星云坍缩 · Event Horizon',
-    serial: '013/100',
+    serial: '013/270',
     rarity: 'holo',
     rarityMark: '◆◆◆',
     rarityLabel: 'HOLO RARE',
@@ -380,7 +383,7 @@ export const CARD_POOL = [
     name: 'Echo',
     tag: '回响',
     trait: '深空回响 · Orbital Echo',
-    serial: '014/100',
+    serial: '014/270',
     rarity: 'holo',
     rarityMark: '◆◆◆',
     rarityLabel: 'HOLO RARE',
@@ -403,7 +406,7 @@ export const CARD_POOL = [
     tag: '至臻',
     fullName: '至臻 水墨丹青 极境行沙洲 不朽永恩',
     trait: '极境行沙洲 · 不朽永恩',
-    serial: '015/100',
+    serial: '015/270',
     rarity: 'ultra',
     rarityMark: '★★★',
     rarityLabel: 'ULTRA RARE',
@@ -421,7 +424,7 @@ export const CARD_POOL = [
     name: 'Helios',
     tag: '日冕',
     trait: '曜金日冕 · Sovereign Corona',
-    serial: '016/100',
+    serial: '016/270',
     rarity: 'ultra',
     rarityMark: '★★★',
     rarityLabel: 'ULTRA RARE',
@@ -446,7 +449,7 @@ export const CARD_POOL = [
     tag: '至臻',
     fullName: '至臻 香水宝石 四叶雾歌 不朽格温',
     trait: '四叶雾歌 · 不朽格温',
-    serial: '017/100',
+    serial: '017/270',
     rarity: 'secret',
     rarityMark: '✦✦✦',
     rarityLabel: 'SECRET RARE',
@@ -464,7 +467,7 @@ export const CARD_POOL = [
     name: 'Vesper',
     tag: '长庚',
     trait: '长庚启明 · Evening Star',
-    serial: '018/100',
+    serial: '018/270',
     rarity: 'secret',
     rarityMark: '✦✦✦',
     rarityLabel: 'SECRET RARE',
@@ -482,5 +485,6 @@ export const CARD_POOL = [
     },
   },
   ...GOLDEN_SPATULA_CARDS,
+  ...HONOR_OF_KINGS_CARDS,
 ];
 

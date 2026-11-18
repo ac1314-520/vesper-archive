@@ -5,12 +5,12 @@
  * 原始图片与来源记录见 assets/golden-spatula/sources.json。
  *
  * 新增/替换角色时只需修改 BASE_CARDS 中对应条目；
- * 编号 019/100–100/100 会由图鉴自动填入。
+ * 编号 019/270–100/270 会由图鉴自动填入。
  */
 
 const BASE_CARDS = [
   {
-    "serial": "019/100",
+    "serial": "019/270",
     "category": "至臻",
     "name": "小小格温",
     "series": "至臻 咖啡甜心",
@@ -19,7 +19,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "020/100",
+    "serial": "020/270",
     "category": "至臻",
     "name": "小小阿狸",
     "series": "至臻 灵魂莲华",
@@ -28,7 +28,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "021/100",
+    "serial": "021/270",
     "category": "至臻",
     "name": "小小锐雯",
     "series": "至臻 玉剑传说 武剑仙",
@@ -37,7 +37,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "022/100",
+    "serial": "022/270",
     "category": "至臻",
     "name": "小小伊泽瑞尔",
     "series": "至臻 青花瓷",
@@ -46,7 +46,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "023/100",
+    "serial": "023/270",
     "category": "至臻",
     "name": "小小永恩",
     "series": "至臻 黎明使者",
@@ -55,7 +55,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "024/100",
+    "serial": "024/270",
     "category": "至臻",
     "name": "小小李青",
     "series": "至臻 龙的传人",
@@ -64,7 +64,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "025/100",
+    "serial": "025/270",
     "category": "至臻",
     "name": "小小亚索",
     "series": "至臻 神龙尊者",
@@ -73,7 +73,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "026/100",
+    "serial": "026/270",
     "category": "至臻",
     "name": "小小希瓦娜",
     "series": "至臻 隐龙之子",
@@ -82,7 +82,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "027/100",
+    "serial": "027/270",
     "category": "至臻不朽",
     "name": "德莱厄斯",
     "series": "神王",
@@ -91,7 +91,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "028/100",
+    "serial": "028/270",
     "category": "至臻不朽",
     "name": "薇恩",
     "series": "源计划：净化",
@@ -100,7 +100,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "029/100",
+    "serial": "029/270",
     "category": "至臻不朽",
     "name": "烬",
     "series": "暗星尊",
@@ -109,7 +109,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "030/100",
+    "serial": "030/270",
     "category": "至臻不朽",
     "name": "沃里克",
     "series": "双城之战2",
@@ -118,7 +118,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "031/100",
+    "serial": "031/270",
     "category": "至臻不朽",
     "name": "金克丝",
     "series": "双城之战2",
@@ -127,7 +127,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "032/100",
+    "serial": "032/270",
     "category": "至臻不朽",
     "name": "锤石",
     "series": "西部魔影",
@@ -136,7 +136,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "033/100",
+    "serial": "033/270",
     "category": "普通神话",
     "name": "小小霞",
     "series": "幻灵蝙蝠",
@@ -145,7 +145,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "034/100",
+    "serial": "034/270",
     "category": "普通神话",
     "name": "小小凯尔",
     "series": "钢铁之翼",
@@ -154,7 +154,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "035/100",
+    "serial": "035/270",
     "category": "普通神话",
     "name": "小小锐雯",
     "series": "黎明使者",
@@ -163,7 +163,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "036/100",
+    "serial": "036/270",
     "category": "普通神话",
     "name": "小小阿木木",
     "series": "惊悚派对",
@@ -172,7 +172,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "037/100",
+    "serial": "037/270",
     "category": "普通神话",
     "name": "小小迦娜",
     "series": "气象主播",
@@ -181,7 +181,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "038/100",
+    "serial": "038/270",
     "category": "普通神话",
     "name": "小小佐伊",
     "series": "剪纸仙灵",
@@ -190,7 +190,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "039/100",
+    "serial": "039/270",
     "category": "普通神话",
     "name": "小小凯特琳",
     "series": "电玩女神",
@@ -199,7 +199,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "040/100",
+    "serial": "040/270",
     "category": "普通神话",
     "name": "小小凯特琳",
     "series": "双城之战2",
@@ -208,7 +208,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "041/100",
+    "serial": "041/270",
     "category": "普通神话",
     "name": "小小悠米",
     "series": "魅惑女巫",
@@ -217,7 +217,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "042/100",
+    "serial": "042/270",
     "category": "普通神话",
     "name": "小小萨勒芬妮",
     "series": "K/DA ALL OUT",
@@ -226,7 +226,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "043/100",
+    "serial": "043/270",
     "category": "普通神话",
     "name": "小小奥莉安娜",
     "series": "灵魂莲华",
@@ -235,7 +235,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "044/100",
+    "serial": "044/270",
     "category": "普通神话",
     "name": "小小奥莉安娜",
     "series": "全球总决赛限定 T1",
@@ -244,7 +244,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "045/100",
+    "serial": "045/270",
     "category": "普通神话",
     "name": "小小卡特琳娜",
     "series": "战斗学院",
@@ -253,7 +253,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "046/100",
+    "serial": "046/270",
     "category": "普通神话",
     "name": "小小布里茨",
     "series": "苹果机器人",
@@ -262,7 +262,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "047/100",
+    "serial": "047/270",
     "category": "普通神话",
     "name": "小小布里茨",
     "series": "太空律动",
@@ -271,7 +271,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "048/100",
+    "serial": "048/270",
     "category": "普通神话",
     "name": "小小璐璐",
     "series": "星之守护者",
@@ -280,7 +280,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "049/100",
+    "serial": "049/270",
     "category": "普通神话",
     "name": "小小厄运小姐",
     "series": "幻灵战斗兔队长",
@@ -289,7 +289,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "050/100",
+    "serial": "050/270",
     "category": "普通神话",
     "name": "小小崔丝塔娜",
     "series": "驯龙炮手",
@@ -298,7 +298,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "051/100",
+    "serial": "051/270",
     "category": "普通神话",
     "name": "小小崔丝塔娜",
     "series": "我是羽饰骑士",
@@ -307,7 +307,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "052/100",
+    "serial": "052/270",
     "category": "普通神话",
     "name": "小小伊泽瑞尔",
     "series": "战斗学院",
@@ -316,7 +316,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "053/100",
+    "serial": "053/270",
     "category": "普通神话",
     "name": "小小永恩",
     "series": "云顶之弈公开赛纪念 灵魂莲华",
@@ -325,7 +325,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "054/100",
+    "serial": "054/270",
     "category": "普通神话",
     "name": "小小莫甘娜",
     "series": "玉剑传说",
@@ -334,7 +334,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "055/100",
+    "serial": "055/270",
     "category": "普通神话",
     "name": "小小娑娜",
     "series": "古琴余韵",
@@ -343,7 +343,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "056/100",
+    "serial": "056/270",
     "category": "普通神话",
     "name": "小小瑟提",
     "series": "灵魂莲华",
@@ -352,7 +352,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "057/100",
+    "serial": "057/270",
     "category": "普通神话",
     "name": "小小瑟提",
     "series": "心之钢",
@@ -361,7 +361,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "058/100",
+    "serial": "058/270",
     "category": "英雄级",
     "name": "小小泽丽",
     "series": "",
@@ -370,7 +370,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "059/100",
+    "serial": "059/270",
     "category": "英雄级",
     "name": "小小烬",
     "series": "",
@@ -379,7 +379,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "060/100",
+    "serial": "060/270",
     "category": "英雄级",
     "name": "小小薇古丝",
     "series": "",
@@ -388,7 +388,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "061/100",
+    "serial": "061/270",
     "category": "英雄级",
     "name": "小小索拉卡",
     "series": "",
@@ -397,7 +397,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "062/100",
+    "serial": "062/270",
     "category": "英雄级",
     "name": "小小辛德拉",
     "series": "",
@@ -406,7 +406,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "063/100",
+    "serial": "063/270",
     "category": "英雄级",
     "name": "小小妮蔻",
     "series": "",
@@ -415,7 +415,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "064/100",
+    "serial": "064/270",
     "category": "英雄级",
     "name": "小小莉莉娅",
     "series": "",
@@ -424,7 +424,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "065/100",
+    "serial": "065/270",
     "category": "英雄级",
     "name": "小小贝蕾亚",
     "series": "",
@@ -433,7 +433,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "066/100",
+    "serial": "066/270",
     "category": "英雄级",
     "name": "小小凯尔",
     "series": "",
@@ -442,7 +442,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "067/100",
+    "serial": "067/270",
     "category": "英雄级",
     "name": "小小锐雯",
     "series": "",
@@ -451,7 +451,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "068/100",
+    "serial": "068/270",
     "category": "英雄级",
     "name": "小小阿木木",
     "series": "",
@@ -460,7 +460,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "069/100",
+    "serial": "069/270",
     "category": "英雄级",
     "name": "小小迦娜",
     "series": "",
@@ -469,7 +469,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "070/100",
+    "serial": "070/270",
     "category": "英雄级",
     "name": "小小佐伊",
     "series": "",
@@ -478,7 +478,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "071/100",
+    "serial": "071/270",
     "category": "英雄级",
     "name": "小小凯特琳",
     "series": "",
@@ -487,7 +487,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "072/100",
+    "serial": "072/270",
     "category": "英雄级",
     "name": "小小悠米",
     "series": "",
@@ -496,7 +496,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "073/100",
+    "serial": "073/270",
     "category": "英雄级",
     "name": "小小萨勒芬妮",
     "series": "",
@@ -505,7 +505,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "074/100",
+    "serial": "074/270",
     "category": "英雄级",
     "name": "小小奥莉安娜",
     "series": "",
@@ -514,7 +514,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "075/100",
+    "serial": "075/270",
     "category": "英雄级",
     "name": "小小卡特琳娜",
     "series": "",
@@ -523,7 +523,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "076/100",
+    "serial": "076/270",
     "category": "英雄级",
     "name": "小小布里茨",
     "series": "",
@@ -532,7 +532,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "077/100",
+    "serial": "077/270",
     "category": "英雄级",
     "name": "小小璐璐",
     "series": "",
@@ -541,7 +541,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "078/100",
+    "serial": "078/270",
     "category": "传说级",
     "name": "杯杯",
     "series": "抹茶",
@@ -550,7 +550,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "079/100",
+    "serial": "079/270",
     "category": "传说级",
     "name": "丝丝",
     "series": "永恒之森",
@@ -559,7 +559,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "080/100",
+    "serial": "080/270",
     "category": "传说级",
     "name": "小白小黑",
     "series": "灵魂莲华",
@@ -568,7 +568,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "081/100",
+    "serial": "081/270",
     "category": "传说级",
     "name": "攻城炮车",
     "series": "糖果大战",
@@ -577,7 +577,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "082/100",
+    "serial": "082/270",
     "category": "传说级",
     "name": "泡泡鱼",
     "series": "苏打水",
@@ -586,7 +586,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "083/100",
+    "serial": "083/270",
     "category": "传说级",
     "name": "片片猫",
     "series": "幽灵",
@@ -595,7 +595,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "084/100",
+    "serial": "084/270",
     "category": "传说级",
     "name": "小石块",
     "series": "冰川",
@@ -604,7 +604,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "085/100",
+    "serial": "085/270",
     "category": "传说级",
     "name": "蛇蛇",
     "series": "星之守护者",
@@ -613,7 +613,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "086/100",
+    "serial": "086/270",
     "category": "传说级",
     "name": "蝠蝠",
     "series": "泳池派对",
@@ -622,7 +622,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "087/100",
+    "serial": "087/270",
     "category": "传说级",
     "name": "蛋挞鸡",
     "series": "太空律动",
@@ -631,7 +631,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "088/100",
+    "serial": "088/270",
     "category": "传说级",
     "name": "哈姆仓鼠",
     "series": "贵族",
@@ -640,7 +640,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "089/100",
+    "serial": "089/270",
     "category": "传说级",
     "name": "鳐鳐",
     "series": "腥红之月",
@@ -649,7 +649,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "090/100",
+    "serial": "090/270",
     "category": "传说级",
     "name": "波波尾",
     "series": "暗星",
@@ -658,7 +658,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "091/100",
+    "serial": "091/270",
     "category": "传说级",
     "name": "混沌",
     "series": "星光",
@@ -667,7 +667,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "092/100",
+    "serial": "092/270",
     "category": "传说级",
     "name": "利刃柴犬",
     "series": "",
@@ -676,7 +676,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "093/100",
+    "serial": "093/270",
     "category": "传说级",
     "name": "猫克塞",
     "series": "诺克萨斯",
@@ -685,7 +685,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "094/100",
+    "serial": "094/270",
     "category": "传说级",
     "name": "魄罗",
     "series": "圣诞",
@@ -694,7 +694,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "095/100",
+    "serial": "095/270",
     "category": "传说级",
     "name": "魄罗",
     "series": "双剑华斩",
@@ -703,7 +703,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "096/100",
+    "serial": "096/270",
     "category": "传说级",
     "name": "鳐鳐",
     "series": "甜心宝贝",
@@ -712,7 +712,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "097/100",
+    "serial": "097/270",
     "category": "传说级",
     "name": "泡泡鱼",
     "series": "小蜜蜂",
@@ -721,7 +721,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 40%"
   },
   {
-    "serial": "098/100",
+    "serial": "098/270",
     "category": "神话棋盘",
     "name": "御墨太极",
     "series": "四象轮转",
@@ -730,7 +730,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 50%"
   },
   {
-    "serial": "099/100",
+    "serial": "099/270",
     "category": "神话棋盘",
     "name": "福根酒馆",
     "series": "祖安夜生活",
@@ -739,7 +739,7 @@ const BASE_CARDS = [
     "artworkPosition": "50% 50%"
   },
   {
-    "serial": "100/100",
+    "serial": "100/270",
     "category": "神话棋盘",
     "name": "三周年蛋糕城堡",
     "series": "三周年限定",

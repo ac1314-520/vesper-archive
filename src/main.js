@@ -1,7 +1,7 @@
-import { PACK_BRAND, PACK_THEMES, RARITY_META, MASCOT_CONFIG, CARD_POOL, TOTAL_CARD_SLOTS } from './cards-config.js?v=20261118g';
+import { PACK_BRAND, PACK_THEMES, RARITY_META, MASCOT_CONFIG, CARD_POOL, TOTAL_CARD_SLOTS } from './cards-config.js?v=20261118h';
 import { createSoundController } from './sound.js';
 
-console.info('[VESPER] 100-card archive · simulated stars build 2026.11.18g');
+console.info('[VESPER] 270-card archive · HOK expansion · build 2026.11.18h');
 
 const $ = (sel) => document.querySelector(sel);
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
@@ -600,7 +600,7 @@ function rollRarityByWeights(weights) {
 }
 
 function generatePackRoll({ forceGod = false } = {}) {
-  const isGodPack = forceGod || Math.random() < 0.08;
+  const isGodPack = forceGod || Math.random() < 0.05;
   const hitPity = binderState.pitySinceUltra >= PITY_THRESHOLD - 1;
   const usedIds = new Set();
 
@@ -624,14 +624,14 @@ function generatePackRoll({ forceGod = false } = {}) {
     ];
     defs = rarities.map(pickFromRarity);
   } else {
-    // 常规 5 卡包：前 3 槽常规/偶发升阶 + 第 4 槽保底 Rare+ + 第 5 槽命中位（Holo / Ultra / Secret）
-    const slot1 = pickFromRarity(rollRarityByWeights([['common', 78], ['rare', 22]]));
-    const slot2 = pickFromRarity(rollRarityByWeights([['common', 74], ['rare', 22], ['holo', 4]]));
-    const slot3 = pickFromRarity(rollRarityByWeights([['common', 68], ['rare', 25], ['holo', 7]]));
-    const slot4 = pickFromRarity(rollRarityByWeights([['rare', 72], ['holo', 22], ['ultra', 6]]));
+    // 270 卡池的低爆率档位：高罕整体下调，第 5 格仍保底全息+
+    const slot1 = pickFromRarity(rollRarityByWeights([['common', 88], ['rare', 12]]));
+    const slot2 = pickFromRarity(rollRarityByWeights([['common', 86], ['rare', 12], ['holo', 2]]));
+    const slot3 = pickFromRarity(rollRarityByWeights([['common', 82], ['rare', 15], ['holo', 3]]));
+    const slot4 = pickFromRarity(rollRarityByWeights([['rare', 86], ['holo', 12], ['ultra', 2]]));
     const hitRarity = hitPity
       ? rollRarityByWeights([['ultra', 72], ['secret', 28]])
-      : rollRarityByWeights([['holo', 54], ['ultra', 34], ['secret', 12]]);
+      : rollRarityByWeights([['holo', 82], ['ultra', 15], ['secret', 3]]);
     const slot5 = pickFromRarity(hitRarity);
     defs = [slot1, slot2, slot3, slot4, slot5];
   }
